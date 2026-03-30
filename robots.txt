@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rahul7860465.github.io/tools-website/sitemap.xml
+

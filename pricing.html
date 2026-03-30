@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Toolbox pricing plans: Free, Pro, and Team." />
+    <meta name="robots" content="index,follow" />
+    <title>Pricing — Toolbox</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./css/styles.css?v=pro-20260327-2" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="./" aria-label="Toolbox home">
+            <span class="brand-mark" aria-hidden="true">TB</span>
+            <span class="brand-text">Toolbox</span>
+          </a>
+          <span class="brand-sub">Developer tools</span>
+        </div>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="./#tools">Tools</a>
+          <a href="./pricing.html" aria-current="page">Pricing</a>
+          <a href="./#about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <section class="hero">
+        <h1>Simple Pricing</h1>
+        <p class="hero-sub">Start free. Upgrade when you need ad-free usage, AI boosts, and team features.</p>
+      </section>
+
+      <section class="section">
+        <div class="grid pricing-grid" role="list">
+          <article class="panel pricing-card" role="listitem">
+            <div class="panel-body">
+              <h2>Free</h2>
+              <p class="muted">₹0 forever</p>
+              <ul class="pricing-list">
+                <li>All basic tools</li>
+                <li>Ad-supported</li>
+                <li>Local history/favorites</li>
+              </ul>
+              <button id="plan-free" class="btn btn-small" type="button">Use Free</button>
+            </div>
+          </article>
+
+          <article class="panel pricing-card featured" role="listitem">
+            <div class="panel-body">
+              <h2>Pro</h2>
+              <p class="muted">Suggested: ₹299/mo</p>
+              <ul class="pricing-list">
+                <li>Ad-free experience</li>
+                <li>Higher AI limits (future)</li>
+                <li>Priority new features</li>
+              </ul>
+              <button id="plan-pro" class="btn btn-primary btn-small" type="button">Go Pro (Demo)</button>
+            </div>
+          </article>
+
+          <article class="panel pricing-card" role="listitem">
+            <div class="panel-body">
+              <h2>Team</h2>
+              <p class="muted">Suggested: ₹1,999/mo</p>
+              <ul class="pricing-list">
+                <li>Everything in Pro</li>
+                <li>Shared workspaces (future)</li>
+                <li>Admin controls (future)</li>
+              </ul>
+              <button id="plan-team" class="btn btn-small" type="button">Use Team (Demo)</button>
+            </div>
+          </article>
+        </div>
+
+        <div id="pricing-status" class="notice" style="display:none; margin-top:14px"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <small>© <span id="year"></span> Toolbox</small>
+        <small class="muted"><a href="./">Back to home</a></small>
+      </div>
+    </footer>
+
+    <script src="./js/main.js?v=pro-20260327-2" defer></script>
+  </body>
+</html>
+

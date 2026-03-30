@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://rahul7860465.github.io/tools-website/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url><loc>https://rahul7860465.github.io/tools-website/pricing.html</loc></url>
+
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/json-formatter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/base64-encoder/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/password-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/uuid-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/url-encoder-decoder/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/text-case-converter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/regex-tester/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/jwt-decoder/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/timestamp-converter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/html-minifier/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/sql-formatter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/cron-helper/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/curl-to-fetch/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/openapi-endpoints/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/json-schema-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/diff-checker/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/yaml-json-converter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/csv-json-converter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/log-beautifier/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/http-status-codes/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/html-entity-encoder/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/unicode-inspector/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/hash-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/hmac-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/keypair-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/pem-fingerprint/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/jwt-builder/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/base64url-encoder/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/timezone-converter/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/lorem-ipsum-generator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/prompt-token-estimator/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/json-flattener/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/markdown-to-html/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/query-param-parser/index.html</loc></url>
+  <url><loc>https://rahul7860465.github.io/tools-website/tools/color-converter/index.html</loc></url>
+</urlset>
+

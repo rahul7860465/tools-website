@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Extract endpoints from an OpenAPI (Swagger) JSON spec locally." />
+    <meta name="robots" content="index,follow" />
+    <title>OpenAPI Endpoints Extractor — Toolbox</title>
+    <link rel="manifest" href="../../manifest.json" />
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../../" aria-label="Toolbox home">
+            <span class="brand-mark" aria-hidden="true">TB</span>
+            <span class="brand-text">Toolbox</span>
+          </a>
+          <span class="brand-sub">Developer tools</span>
+        </div>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../../#tools">Tools</a>
+          <a href="../../#about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <section class="tool-head">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="../../">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">OpenAPI Endpoints Extractor</span>
+        </nav>
+        <div class="tool-title">
+          <h1>OpenAPI Endpoints Extractor</h1>
+          <span class="pill">Developer Tools</span>
+        </div>
+        <p class="muted">Paste an OpenAPI JSON spec and get a clean list of endpoints.</p>
+        <div id="share-bar" class="share-bar" aria-label="Share this tool"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-body">
+          <div class="row two">
+            <div>
+              <label class="muted" for="input">OpenAPI JSON</label>
+              <textarea id="input" spellcheck="false" placeholder="{&quot;openapi&quot;:&quot;3.0.0&quot;,...}"></textarea>
+            </div>
+            <div>
+              <label class="muted" for="output">Endpoints</label>
+              <pre id="output" class="output" aria-live="polite"></pre>
+            </div>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button id="run" class="btn">Extract</button>
+            <button id="copy" class="btn btn-small">Copy</button>
+            <button id="clear" class="btn btn-small btn-danger">Clear</button>
+            <span id="status" class="notice" style="display:none"></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <div class="muted">© <span id="year"></span> Toolbox</div>
+        <div class="muted">Built for fast, private in-browser use.</div>
+      </div>
+    </footer>
+
+    <script type="module" src="../../js/main.js"></script>
+    <script src="../../js/tool-loader.js"></script>
+  </body>
+</html>
+

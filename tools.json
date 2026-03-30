@@ -1,0 +1,356 @@
+{
+  "version": 1,
+  "tools": [
+    {
+      "id": "json-formatter",
+      "name": "JSON Formatter",
+      "description": "Prettify, validate, and download JSON.",
+      "category": "Developer Tools",
+      "path": "./tools/json-formatter/index.html",
+      "icon": "json",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "base64-encoder",
+      "name": "Base64 Encoder/Decoder",
+      "description": "Encode/decode Base64 (UTF‑8).",
+      "category": "Encoding Tools",
+      "path": "./tools/base64-encoder/index.html",
+      "icon": "base64",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "password-generator",
+      "name": "Password Generator",
+      "description": "Generate strong passwords locally.",
+      "category": "Security Tools",
+      "path": "./tools/password-generator/index.html",
+      "icon": "password",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "uuid-generator",
+      "name": "UUID Generator",
+      "description": "Generate UUID v4 values.",
+      "category": "Developer Tools",
+      "path": "./tools/uuid-generator/index.html",
+      "icon": "uuid",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "url-encoder-decoder",
+      "name": "URL Encode/Decode",
+      "description": "Encode/decode URL components.",
+      "category": "Encoding Tools",
+      "path": "./tools/url-encoder-decoder/index.html",
+      "icon": "url",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "text-case-converter",
+      "name": "Text Case Converter",
+      "description": "Convert between common text cases.",
+      "category": "Text Tools",
+      "path": "./tools/text-case-converter/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "regex-tester",
+      "name": "Regex Tester",
+      "description": "Test regex patterns and inspect matches.",
+      "category": "Developer Tools",
+      "path": "./tools/regex-tester/index.html",
+      "icon": "regex",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "jwt-decoder",
+      "name": "JWT Decoder",
+      "description": "Decode JWT header and payload locally.",
+      "category": "Security Tools",
+      "path": "./tools/jwt-decoder/index.html",
+      "icon": "jwt",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "timestamp-converter",
+      "name": "Timestamp Converter",
+      "description": "Convert Unix timestamps to dates.",
+      "category": "Developer Tools",
+      "path": "./tools/timestamp-converter/index.html",
+      "icon": "time",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "html-minifier",
+      "name": "HTML Minifier",
+      "description": "Minify HTML for quick sharing.",
+      "category": "Text Tools",
+      "path": "./tools/html-minifier/index.html",
+      "icon": "html",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "sql-formatter",
+      "name": "SQL Formatter",
+      "description": "Format and prettify SQL queries.",
+      "category": "Developer Tools",
+      "path": "./tools/sql-formatter/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "cron-helper",
+      "name": "Cron Helper",
+      "description": "Validate cron expressions and preview next runs.",
+      "category": "Developer Tools",
+      "path": "./tools/cron-helper/index.html",
+      "icon": "time",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "curl-to-fetch",
+      "name": "cURL to Fetch",
+      "description": "Convert curl commands into JavaScript fetch().",
+      "category": "Developer Tools",
+      "path": "./tools/curl-to-fetch/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "openapi-endpoints",
+      "name": "OpenAPI Endpoints Extractor",
+      "description": "List paths and operations from an OpenAPI spec (JSON).",
+      "category": "Developer Tools",
+      "path": "./tools/openapi-endpoints/index.html",
+      "icon": "json",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "json-schema-generator",
+      "name": "JSON Schema Generator",
+      "description": "Generate a JSON Schema from example JSON.",
+      "category": "Developer Tools",
+      "path": "./tools/json-schema-generator/index.html",
+      "icon": "json",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "diff-checker",
+      "name": "Diff Checker",
+      "description": "Compare two texts and highlight differences.",
+      "category": "Developer Tools",
+      "path": "./tools/diff-checker/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "yaml-json-converter",
+      "name": "YAML ↔ JSON Converter",
+      "description": "Convert simple YAML to JSON and back.",
+      "category": "Developer Tools",
+      "path": "./tools/yaml-json-converter/index.html",
+      "icon": "json",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "csv-json-converter",
+      "name": "CSV ↔ JSON Converter",
+      "description": "Convert CSV to JSON and JSON to CSV.",
+      "category": "Developer Tools",
+      "path": "./tools/csv-json-converter/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "log-beautifier",
+      "name": "Log Beautifier",
+      "description": "Pretty-print JSON logs and group stack traces.",
+      "category": "Developer Tools",
+      "path": "./tools/log-beautifier/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "http-status-codes",
+      "name": "HTTP Status Finder",
+      "description": "Search HTTP status codes and meanings.",
+      "category": "Developer Tools",
+      "path": "./tools/http-status-codes/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "html-entity-encoder",
+      "name": "HTML Entity Encoder/Decoder",
+      "description": "Encode/decode HTML entities safely.",
+      "category": "Text Tools",
+      "path": "./tools/html-entity-encoder/index.html",
+      "icon": "html",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "unicode-inspector",
+      "name": "Unicode Inspector",
+      "description": "Inspect code points, UTF-16 units, and escapes.",
+      "category": "Text Tools",
+      "path": "./tools/unicode-inspector/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "hash-generator",
+      "name": "Hash Generator",
+      "description": "Generate SHA hashes for text using WebCrypto.",
+      "category": "Security Tools",
+      "path": "./tools/hash-generator/index.html",
+      "icon": "jwt",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "hmac-generator",
+      "name": "HMAC Generator",
+      "description": "Generate HMAC (SHA-256) signatures locally.",
+      "category": "Security Tools",
+      "path": "./tools/hmac-generator/index.html",
+      "icon": "jwt",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "keypair-generator",
+      "name": "Key Pair Generator",
+      "description": "Generate RSA key pairs and export JWK.",
+      "category": "Security Tools",
+      "path": "./tools/keypair-generator/index.html",
+      "icon": "jwt",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "pem-fingerprint",
+      "name": "PEM Fingerprint",
+      "description": "Compute SHA-256 fingerprint for a PEM block.",
+      "category": "Security Tools",
+      "path": "./tools/pem-fingerprint/index.html",
+      "icon": "jwt",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "jwt-builder",
+      "name": "JWT Builder (Unsigned)",
+      "description": "Build and base64url-encode JWT parts locally.",
+      "category": "Security Tools",
+      "path": "./tools/jwt-builder/index.html",
+      "icon": "jwt",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "base64url-encoder",
+      "name": "Base64URL Encoder/Decoder",
+      "description": "Encode/decode Base64URL strings.",
+      "category": "Encoding Tools",
+      "path": "./tools/base64url-encoder/index.html",
+      "icon": "base64",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "timezone-converter",
+      "name": "Timezone Converter",
+      "description": "See current time across common timezones.",
+      "category": "Developer Tools",
+      "path": "./tools/timezone-converter/index.html",
+      "icon": "time",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "lorem-ipsum-generator",
+      "name": "Lorem Ipsum Generator",
+      "description": "Generate placeholder text quickly.",
+      "category": "Text Tools",
+      "path": "./tools/lorem-ipsum-generator/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "prompt-token-estimator",
+      "name": "Prompt Token Estimator",
+      "description": "Estimate token count for AI prompts instantly.",
+      "category": "Developer Tools",
+      "path": "./tools/prompt-token-estimator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "json-flattener",
+      "name": "JSON Flattener",
+      "description": "Flatten nested JSON into dot notation keys.",
+      "category": "Developer Tools",
+      "path": "./tools/json-flattener/index.html",
+      "icon": "json",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "markdown-to-html",
+      "name": "Markdown to HTML",
+      "description": "Convert markdown text to clean HTML.",
+      "category": "Text Tools",
+      "path": "./tools/markdown-to-html/index.html",
+      "icon": "html",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "query-param-parser",
+      "name": "Query Param Parser",
+      "description": "Parse URL query strings into JSON and back.",
+      "category": "Developer Tools",
+      "path": "./tools/query-param-parser/index.html",
+      "icon": "url",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "color-converter",
+      "name": "Color Converter",
+      "description": "Convert colors between HEX, RGB, and HSL.",
+      "category": "Developer Tools",
+      "path": "./tools/color-converter/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    }
+  ]
+}
+

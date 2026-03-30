@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Fast, lightweight developer tools: JSON formatter, Base64, password generator, UUID, URL encode/decode, regex tester, JWT decoder, timestamps, and more."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="./" />
+    <title>Toolbox — Developer Tools</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./css/styles.css?v=pro-20260327-2" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="./" aria-label="Toolbox home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 8.2L12 4.7l6 3.5v7.6l-6 3.5-6-3.5V8.2Z" stroke="currentColor" stroke-width="1.8" opacity=".95"/>
+                <path d="M8.6 10.1h6.8M8.6 13.9h6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="brand-text">Toolbox</span>
+          </a>
+          <span class="brand-sub">Developer tools</span>
+        </div>
+
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#tools">Tools</a>
+          <a href="./pricing.html">Pricing</a>
+          <a href="#about">About</a>
+        </nav>
+      </div>
+      <div class="container header-strap">
+        <span class="strap-pill"><span class="strap-dot" aria-hidden="true"></span><span>Fast developer tools, one place</span></span>
+        <span class="muted">Private • offline-ready • zero install</span>
+      </div>
+    </header>
+
+    <div class="ad-banner" aria-label="Advertisement">
+      <div class="container">
+        <ins
+          class="adsbygoogle"
+          style="display:block; width:100%; max-width:728px; height:90px;"
+          data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+          data-ad-slot="xxxxxxxxxx"
+          data-adtest="on"
+        >
+          Header AdSense Placeholder (728x90)
+        </ins>
+      </div>
+    </div>
+
+    <main id="main" class="container home-main">
+      <section id="smart-analyze" class="section">
+        <details class="section-fold panel smart-panel">
+          <summary class="section-fold-summary">
+            <strong>Smart Analyze (AI-style)</strong>
+            <span class="muted">Paste JSON, JWT, URL, SQL, logs, CSV, HTML...</span>
+          </summary>
+          <div class="panel-body">
+            <div class="row two">
+              <div>
+                <label class="sr-only" for="smart-input">Smart input</label>
+                <textarea id="smart-input" placeholder="Paste your raw data here. Example: JWT token, API payload, SQL query, logs..."></textarea>
+                <div class="smart-presets" aria-label="Quick presets">
+                  <button type="button" class="chip smart-preset" data-seed='{"userId":1,"name":"Alex"}'>JSON sample</button>
+                  <button type="button" class="chip smart-preset" data-seed="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature">JWT sample</button>
+                  <button type="button" class="chip smart-preset" data-seed="SELECT id, email FROM users WHERE active = 1;">SQL sample</button>
+                </div>
+                <div class="actions" style="margin-top:10px">
+                  <button id="smart-run" class="btn btn-primary btn-small" type="button">Analyze now</button>
+                  <button id="smart-clear" class="btn btn-small btn-danger" type="button">Clear</button>
+                </div>
+              </div>
+              <div>
+                <div id="smart-result" class="notice" aria-live="polite">Detection result will appear here.</div>
+                <div id="smart-suggestions" class="smart-suggestions" style="margin-top:10px"></div>
+                <div class="actions" style="margin-top:10px">
+                  <button id="capsule-save" class="btn btn-small" type="button">Save capsule</button>
+                  <button id="capsule-export" class="btn btn-small" type="button">Export capsules</button>
+                  <button id="capsule-import" class="btn btn-small" type="button">Import capsules</button>
+                  <input id="capsule-file" type="file" accept="application/json" style="display:none" />
+                </div>
+              </div>
+            </div>
+            <div id="capsule-list" class="smart-suggestions" style="margin-top:12px"></div>
+          </div>
+        </details>
+      </section>
+
+      <section id="advanced-lab" class="section">
+        <details class="section-fold panel">
+          <summary class="section-fold-summary">
+            <strong>Advanced Checks</strong>
+            <span class="muted">Fast integrity checks for payload changes and token risks.</span>
+          </summary>
+          <div class="panel-body">
+            <div class="grid advanced-grid">
+              <article class="panel advanced-card">
+                <div class="panel-body">
+                  <details open>
+                <summary class="advanced-summary">
+                  <span>
+                    <strong>API Change Checker</strong>
+                    <span class="muted">Compare old/new JSON payload structure</span>
+                  </span>
+                  <span class="tag">Advanced</span>
+                </summary>
+                <p class="muted" style="margin-top:10px">Paste OLD JSON, then <code>---</code>, then NEW JSON.</p>
+                <textarea id="drift-input" placeholder='{"a":1,"b":"x"}&#10;---&#10;{"a":1,"c":true}'></textarea>
+                <div class="actions" style="margin-top:10px">
+                  <button id="drift-run" class="btn btn-small btn-primary" type="button">Check changes</button>
+                </div>
+                <pre id="drift-output" class="output advanced-output" style="margin-top:10px"></pre>
+                  </details>
+                </div>
+              </article>
+
+              <article class="panel advanced-card">
+                <div class="panel-body">
+                  <details>
+                <summary class="advanced-summary">
+                  <span>
+                    <strong>JWT Safety Check</strong>
+                    <span class="muted">Quickly audit token expiry and risky settings</span>
+                  </span>
+                  <span class="tag">Advanced</span>
+                </summary>
+                <p class="muted" style="margin-top:10px">Paste a JWT token to see security findings.</p>
+                <textarea id="jwt-audit-input" placeholder="eyJhbGciOi..."></textarea>
+                <div class="actions" style="margin-top:10px">
+                  <button id="jwt-audit-run" class="btn btn-small btn-primary" type="button">Run safety check</button>
+                </div>
+                <pre id="jwt-audit-output" class="output advanced-output" style="margin-top:10px"></pre>
+                  </details>
+                </div>
+              </article>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section id="popular" class="section">
+        <div class="section-head">
+          <h2>Popular Tools</h2>
+          <div class="muted">Your most used tools on this device</div>
+        </div>
+        <div id="popular-tools" class="grid popular-grid" role="list"></div>
+      </section>
+
+      <section id="tools" class="section">
+        <div class="dashboard-shell">
+          <aside class="dashboard-sidebar panel" aria-label="Tool filters and controls">
+            <div class="panel-body">
+              <h2 class="dashboard-title">Tool Explorer</h2>
+              <p class="muted" style="margin:0 0 12px">Search fast, filter by category, and browse in pages.</p>
+
+              <div class="filters-vertical" aria-label="Tool filters">
+                <div class="search">
+                  <label class="sr-only" for="tool-search">Search tools</label>
+                  <input id="tool-search" class="input" type="search" placeholder="Search name or description..." autocomplete="off" />
+                </div>
+                <div class="filter">
+                  <label class="sr-only" for="tool-category">Filter by category</label>
+                  <select id="tool-category" class="input">
+                    <option value="all">All categories</option>
+                    <option value="Developer Tools">Developer Tools</option>
+                    <option value="Encoding Tools">Encoding Tools</option>
+                    <option value="Text Tools">Text Tools</option>
+                    <option value="Security Tools">Security Tools</option>
+                  </select>
+                </div>
+              </div>
+              <div id="category-chips" class="category-chips" aria-label="Quick category filters"></div>
+
+              <div class="dashboard-stats">
+                <div class="stat-card">
+                  <div class="stat-label">Visible</div>
+                  <div id="tools-meta" class="stat-value" aria-live="polite">Loading...</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Mode</div>
+                  <div class="stat-value">Pro Dashboard</div>
+                </div>
+              </div>
+              <div class="actions" style="margin-top:12px">
+                <button id="density-toggle" type="button" class="btn btn-small">Compact view</button>
+              </div>
+            </div>
+          </aside>
+
+          <div class="dashboard-main">
+            <div class="dashboard-commandbar">
+              <span class="muted">Tip: Use search + category chips for instant narrowing.</span>
+            </div>
+            <div class="dashboard-topbar">
+              <h2>All Tools</h2>
+              <div class="pager" aria-label="Tool pagination">
+                <button id="pager-prev" type="button" class="btn btn-small">Previous</button>
+                <span id="pager-meta" class="muted">Page 1</span>
+                <button id="pager-next" type="button" class="btn btn-small">Next</button>
+              </div>
+            </div>
+
+            <div class="tools-layout">
+              <div>
+                <div id="tool-grid" class="grid grid-dashboard" role="list" aria-busy="true"></div>
+                <div id="tool-empty" class="notice" style="display:none; margin-top:12px">
+                  No tools match your filters. Try another keyword or category.
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-ads" aria-label="Advertisement">
+              <ins
+                class="adsbygoogle"
+                style="display:block; width:100%; height:110px;"
+                data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                data-ad-slot="xxxxxxxxxx"
+                data-adtest="on"
+              >
+                Dashboard Inline Ad Space (Responsive)
+              </ins>
+              <ins
+                class="adsbygoogle"
+                style="display:block; width:100%; height:110px;"
+                data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                data-ad-slot="xxxxxxxxxx"
+                data-adtest="on"
+              >
+                Dashboard Secondary Ad Space (Responsive)
+              </ins>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section">
+        <h2>About</h2>
+        <div class="prose">
+          <p>
+            This site is built with plain HTML, CSS, and vanilla JavaScript. Most tools run entirely in your browser.
+          </p>
+          <p class="muted">
+            Tip: Bookmark the tools you use most.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="ad-footer" aria-label="Advertisement">
+        <div class="container">
+          <ins
+            class="adsbygoogle"
+            style="display:block; width:100%; max-width:728px; height:90px; margin:0 auto;"
+            data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+            data-ad-slot="xxxxxxxxxx"
+            data-adtest="on"
+          >
+            Footer AdSense Placeholder (728x90)
+          </ins>
+        </div>
+      </div>
+      <div class="container footer-row">
+        <small>© <span id="year"></span> Toolbox</small>
+        <small class="muted">Fast • Lightweight • Client-side</small>
+      </div>
+    </footer>
+
+    <script src="./js/main.js?v=pro-20260327-2" defer></script>
+  </body>
+</html>

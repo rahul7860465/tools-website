@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "tools": {
+    "json-formatter": true,
+    "base64-encoder": true,
+    "password-generator": true,
+    "uuid-generator": true,
+    "url-encoder-decoder": true,
+    "text-case-converter": true,
+    "regex-tester": true,
+    "jwt-decoder": true,
+    "timestamp-converter": true,
+    "html-minifier": true,
+    "sql-formatter": true,
+    "cron-helper": true,
+    "curl-to-fetch": true,
+    "openapi-endpoints": true,
+    "json-schema-generator": true,
+    "diff-checker": true,
+    "yaml-json-converter": true,
+    "csv-json-converter": true,
+    "log-beautifier": true,
+    "http-status-codes": true,
+    "html-entity-encoder": true,
+    "unicode-inspector": true,
+    "hash-generator": true,
+    "hmac-generator": true,
+    "keypair-generator": true,
+    "pem-fingerprint": true,
+    "jwt-builder": true,
+    "base64url-encoder": true,
+    "timezone-converter": true,
+    "lorem-ipsum-generator": true,
+    "prompt-token-estimator": true,
+    "json-flattener": true,
+    "markdown-to-html": true,
+    "query-param-parser": true,
+    "color-converter": true
+  },
+  "premiumTools": {
+    "regex-tester": false
+  }
+}
+

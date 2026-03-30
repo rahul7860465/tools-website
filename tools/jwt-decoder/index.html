@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Decode JWT header and payload locally (no verification)." />
+    <meta name="robots" content="index,follow" />
+    <title>JWT Decoder — Toolbox</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../../" aria-label="Toolbox home">
+            <span class="brand-mark" aria-hidden="true">TB</span>
+            <span class="brand-text">Toolbox</span>
+          </a>
+          <span class="brand-sub">Developer tools</span>
+        </div>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="../../#tools">Tools</a>
+          <a href="../../#about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ad-banner" aria-label="Advertisement">
+      <div class="container">
+        <ins
+          class="adsbygoogle"
+          style="display:block; width:100%; max-width:728px; height:90px; margin:0 auto;"
+          data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+          data-ad-slot="xxxxxxxxxx"
+          data-adtest="on"
+        >
+          Header AdSense Placeholder (728x90)
+        </ins>
+      </div>
+    </div>
+
+    <main id="main" class="container">
+      <section class="tool-head">
+        <div class="crumbs">
+          <a href="../../">Home</a>
+          <span aria-hidden="true"> / </span>
+          <span>JWT Decoder</span>
+        </div>
+        <div class="tool-title">
+          <h1>JWT Decoder</h1>
+          <span class="pill">No verify</span>
+        </div>
+        <p class="muted">Decode header and payload locally. This does not verify signatures.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-body">
+          <div class="actions" style="margin-bottom:10px">
+            <button class="btn btn-small btn-primary" id="run" type="button">Decode</button>
+            <button class="btn btn-small" id="copy" type="button">Copy output</button>
+            <button class="btn btn-small btn-danger" id="clear" type="button">Clear</button>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label class="muted" for="input">JWT</label>
+              <textarea id="input" placeholder="Paste JWT here..."></textarea>
+            </div>
+            <div>
+              <label class="muted" for="output">Decoded</label>
+              <pre id="output" class="output" aria-live="polite"></pre>
+            </div>
+          </div>
+          <aside class="ad-sidebar" aria-label="Advertisement">
+            <ins
+              class="adsbygoogle"
+              style="display:block; width:100%; height:250px;"
+              data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+              data-ad-slot="xxxxxxxxxx"
+              data-adtest="on"
+            >
+              Sidebar AdSense Placeholder (300x250)
+            </ins>
+          </aside>
+          <div id="status" class="notice" style="display:none; margin-top:12px"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>How to use this tool</h2>
+        <div class="prose">
+          <p><strong>Short description:</strong> Decode JWT header and payload locally (no signature verification).</p>
+          <ol>
+            <li>Paste a JWT token into the input box.</li>
+            <li>Click <strong>Decode</strong>.</li>
+            <li>Copy the decoded output.</li>
+          </ol>
+
+          <h3>Example input</h3>
+          <pre class="sample">e30.e30</pre>
+
+          <h3>Example output</h3>
+          <pre class="sample">Header:
+{
+  ...
+}
+
+Payload:
+{
+  ...
+}</pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="ad-footer" aria-label="Advertisement">
+        <div class="container">
+          <ins
+            class="adsbygoogle"
+            style="display:block; width:100%; max-width:728px; height:90px; margin:0 auto;"
+            data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+            data-ad-slot="xxxxxxxxxx"
+            data-adtest="on"
+          >
+            Footer AdSense Placeholder (728x90)
+          </ins>
+        </div>
+      </div>
+      <div class="container footer-row">
+        <small>© <span id="year"></span> Toolbox</small>
+        <small class="muted"><a href="../../">Back to home</a></small>
+      </div>
+    </footer>
+
+    <script src="../../js/main.js" defer></script>
+    <script type="module" src="../../js/tool-loader.js" defer></script>
+  </body>
+</html>
+
