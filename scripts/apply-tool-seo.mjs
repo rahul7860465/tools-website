@@ -170,66 +170,41 @@ function buildJsonLd(tool, canonical, faqs) {
 function buildSeoBlock(tool) {
   const related = pickRelated(tool.id, 8);
   const linksSentence = internalLinksHtml(tool.id, related);
-  const article = buildLongArticle(tool, linksSentence);
   const faqs = buildFaqs(tool);
-
-  const features = [
-    `Runs in your browser with ${tool.name} focused controls.`,
-    `Uses Toolbox’s lightweight layout: paste, run, copy.`,
-    `No account required for standard use.`,
-    `Part of ${tool.category} tools on Toolbox.`,
-  ];
-
-  const howTo = [
-    `Open the tool and paste your input in the field above.`,
-    `Use the primary action button (for example Run, Format, or Generate).`,
-    `Review the output and use Copy or download if available.`,
-    `Clear fields when switching to a new sample to avoid mixing data.`,
-  ];
-
-  const benefits = [
-    `Saves time during API debugging and data cleanup tasks.`,
-    `Keeps common workflows in one place with other Toolbox utilities.`,
-    `Works well for quick checks without opening heavy IDEs.`,
-    `Privacy-friendly client-side design for typical browser use.`,
-  ];
-
-  const featList = features.map((x) => `<li>${escapeHtml(x)}</li>`).join("\n          ");
-  const howList = howTo.map((x) => `<li>${escapeHtml(x)}</li>`).join("\n          ");
-  const benList = benefits.map((x) => `<li>${escapeHtml(x)}</li>`).join("\n          ");
   const faqHtml = faqs
     .map((f) => `          <h3>${escapeHtml(f.q)}</h3>\n          <p>${escapeHtml(f.a)}</p>`)
     .join("\n\n");
 
+  const whatIsHtml = `
+          <p>The <strong>${escapeHtml(tool.name)}</strong> is a browser-based utility that helps you ${escapeHtml(
+            tool.description.replace(/\.$/, "").toLowerCase()
+          )}. It is designed for developers, QA engineers, students, and teams who want quick, reliable output without installing heavy software. Because it lives inside Toolbox, you get a focused interface and consistent workflow that fits naturally into day-to-day debugging, testing, and content-cleanup tasks.</p>`;
+
+  const whyUseHtml = `
+          <p>Use ${escapeHtml(
+            tool.name
+          )} when speed, simplicity, and privacy matter. The page is built for fast copy-paste workflows: enter input, run the action, verify output, and continue your work. For typical use cases, processing stays in your browser, which helps keep data local. ${linksSentence} That connected tool flow reduces context switching and makes repeated tasks easier to standardize across projects.</p>`;
+
+  const howItWorksHtml = `
+          <p>Start by pasting a small sample into the input area, then click the main action button to process it. Review the result, adjust input if needed, and run again until the output matches your target format. Once validated, copy or export the final result for documentation, QA checks, API testing, or production tasks. This repeatable loop keeps the process clear, fast, and easy to verify.</p>`;
+
   return `<!-- toolbox-seo -->
-      <section class="section" id="tool-seo-features" aria-labelledby="h2-features">
-        <h2 id="h2-features">Features</h2>
+      <section class="section" id="tool-seo-whatis" aria-labelledby="h2-whatis">
+        <h2 id="h2-whatis">What is a ${escapeHtml(tool.name)} Tool?</h2>
         <div class="prose">
-          <ul>
-          ${featList}
-          </ul>
+${whatIsHtml}
         </div>
       </section>
-      <section class="section" id="tool-seo-howto" aria-labelledby="h2-howto">
-        <h2 id="h2-howto">How to Use</h2>
+      <section class="section" id="tool-seo-whyuse" aria-labelledby="h2-whyuse">
+        <h2 id="h2-whyuse">Why Use a ${escapeHtml(tool.name)}?</h2>
         <div class="prose">
-          <ol>
-          ${howList}
-          </ol>
+${whyUseHtml}
         </div>
       </section>
-      <section class="section" id="tool-seo-benefits" aria-labelledby="h2-benefits">
-        <h2 id="h2-benefits">Benefits</h2>
+      <section class="section tool-seo-article" id="tool-seo-how" aria-labelledby="h2-how">
+        <h2 id="h2-how">How This Tool Works</h2>
         <div class="prose">
-          <ul>
-          ${benList}
-          </ul>
-        </div>
-      </section>
-      <section class="section tool-seo-article" id="tool-seo-content" aria-labelledby="h2-guide">
-        <h2 id="h2-guide">About this tool</h2>
-        <div class="prose">
-${article}
+${howItWorksHtml}
         </div>
       </section>
       <section class="section" id="tool-seo-faq" aria-labelledby="h2-faq">
