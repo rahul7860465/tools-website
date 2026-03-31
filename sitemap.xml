@@ -37,6 +37,10 @@
   <url><loc>https://toolgarage.netlify.app/tools/timezone-converter/index.html</loc></url>
   <url><loc>https://toolgarage.netlify.app/tools/lorem-ipsum-generator/index.html</loc></url>
   <url><loc>https://toolgarage.netlify.app/tools/prompt-token-estimator/index.html</loc></url>
+  <url><loc>https://toolgarage.netlify.app/tools/prompt-generator/index.html</loc></url>
+  <url><loc>https://toolgarage.netlify.app/tools/prompt-optimizer/index.html</loc></url>
+  <url><loc>https://toolgarage.netlify.app/tools/token-counter/index.html</loc></url>
+  <url><loc>https://toolgarage.netlify.app/tools/code-explainer/index.html</loc></url>
   <url><loc>https://toolgarage.netlify.app/tools/json-flattener/index.html</loc></url>
   <url><loc>https://toolgarage.netlify.app/tools/markdown-to-html/index.html</loc></url>
   <url><loc>https://toolgarage.netlify.app/tools/query-param-parser/index.html</loc></url>

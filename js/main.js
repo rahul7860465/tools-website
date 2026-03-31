@@ -793,6 +793,22 @@
     }
   }
 
+  function renderAiToolsSection() {
+    const root = document.getElementById("ai-tool-grid");
+    const section = document.getElementById("ai-tools");
+    if (!root || !section) return;
+    const aiTools = __tools.filter((t) => String(t.category || "") === "AI Tools");
+    if (!aiTools.length) {
+      section.style.display = "none";
+      return;
+    }
+    section.style.display = "";
+    root.innerHTML = "";
+    for (const t of aiTools) {
+      root.appendChild(buildCard(t, { pathIsRelativeToCurrent: true }));
+    }
+  }
+
   function detectInputType(raw) {
     const text = String(raw || "").trim();
     if (!text) return { type: "empty", confidence: 0, reason: "No input." };
@@ -1111,6 +1127,7 @@
 
       // Homepage: popular tools.
       renderPopularTools();
+      renderAiToolsSection();
       initSmartAnalyze();
       if (meta && !document.getElementById("tool-search")) {
         meta.textContent = `${__tools.length} tools`;

@@ -312,6 +312,46 @@
       "premium": false
     },
     {
+      "id": "prompt-generator",
+      "name": "Prompt Generator",
+      "description": "Generate structured prompts for AI workflows.",
+      "category": "AI Tools",
+      "path": "./tools/prompt-generator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "prompt-optimizer",
+      "name": "Prompt Optimizer",
+      "description": "Refine prompts for clearer and better AI output.",
+      "category": "AI Tools",
+      "path": "./tools/prompt-optimizer/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "token-counter",
+      "name": "Token Counter",
+      "description": "Estimate prompt tokens with live character and word counts.",
+      "category": "AI Tools",
+      "path": "./tools/token-counter/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "code-explainer",
+      "name": "Code Explainer",
+      "description": "Explain code in simple language section by section.",
+      "category": "AI Tools",
+      "path": "./tools/code-explainer/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
       "id": "json-flattener",
       "name": "JSON Flattener",
       "description": "Flatten nested JSON into dot notation keys.",

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43KGB1VEBE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-43KGB1VEBE');
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Use this free online Token Counter to improve prompts, estimate tokens, and understand code instantly." />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://toolgarage.netlify.app/tools/token-counter/index.html" />
+    <title>Token Counter &ndash; Free Online AI Tool</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../../" aria-label="Toolbox home"><span class="brand-mark" aria-hidden="true">TB</span><span class="brand-text">Toolbox</span></a>
+          <span class="brand-sub">Developer tools</span>
+        </div>
+        <nav class="site-nav" aria-label="Primary"><a href="../../#tools">Tools</a><a href="../../#about">About</a></nav>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <section class="tool-head">
+        <div class="crumbs"><a href="../../">Home</a><span aria-hidden="true"> / </span><span>Token Counter</span></div>
+        <div class="tool-title"><h1>Token Counter</h1><span class="pill">AI Tools</span></div>
+        <p class="muted">Estimate token usage instantly while typing.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-body">
+          <label class="muted" for="input">Text</label>
+          <textarea id="input" placeholder="Paste or type text to estimate token usage..."></textarea>
+          <div class="grid" style="margin-top:12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <div class="notice"><strong>Characters</strong><div id="chars">0</div></div>
+            <div class="notice"><strong>Words</strong><div id="words">0</div></div>
+            <div class="notice"><strong>Estimated Tokens</strong><div id="tokens">0</div></div>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button id="copy" class="btn btn-small" type="button">Copy text</button>
+            <button id="clear" class="btn btn-small btn-danger" type="button">Clear</button>
+          </div>
+          <div id="status" class="notice" style="display:none; margin-top:12px"></div>
+        </div>
+      </section>
+
+      <section class="section"><h2>Features</h2><div class="prose"><ul><li>Live character, word, and token estimates while typing.</li><li>Simple token model: about 1 token per 4 characters.</li><li>Copy input text instantly.</li><li>No backend required.</li></ul></div></section>
+      <section class="section"><h2>How to Use</h2><div class="prose"><ol><li>Paste text into the large input box.</li><li>View counts update in real time.</li><li>Use the estimate to plan prompt size and model cost.</li><li>Copy or clear as needed.</li></ol></div></section>
+
+      <section class="section">
+        <h2>Example</h2>
+        <div class="prose">
+          <p><strong>Search intent target:</strong> GPT token counter.</p>
+          <p>Token Counter helps you estimate how much context your text may consume in an AI model. This matters for prompt engineering, API budgeting, and avoiding context window limits. Instead of guessing message size, you can get quick character and word statistics plus an estimated token count using a lightweight approximation: one token is roughly four characters for English-like text.</p>
+          <p>Writers and developers often overrun token limits by adding long instructions, logs, or code blocks. This tool gives immediate feedback while typing, so you can trim unnecessary parts and keep the prompt efficient. It is useful for preparing chat prompts, summarization requests, product documentation, and long support responses where cost and model limits matter.</p>
+          <p>Although exact tokenization differs by model, a fast estimate is enough for early planning. You can draft content here, watch token growth live, and decide whether to split prompts into smaller chunks. This approach improves reliability in production pipelines and prevents sudden failures from oversized requests.</p>
+          <p>For better estimation, remove repeated text and keep instructions concise. Then run final checks in your model-specific tokenizer if required. This page is optimized for speed and convenience, making it a practical first step for anyone searching a free GPT token counter online.</p>
+        </div>
+      </section>
+
+      <section class="section"><h2>FAQs</h2><div class="prose"><h3>Are token counts exact?</h3><p>No, this tool gives an approximation useful for planning.</p><h3>What formula is used?</h3><p>Estimated tokens = characters divided by 4, rounded up.</p><h3>Does it work offline?</h3><p>Yes, after initial load, most functionality works in-browser.</p></div></section>
+
+      <section class="section" aria-label="Related tools"><h2>Related Tools</h2><div id="related-tools" class="grid" role="list"></div></section>
+    </main>
+    <footer class="site-footer"><div class="container footer-row"><small>© <span id="year"></span> Toolbox</small><small class="muted"><a href="../../">Back to home</a></small></div></footer>
+    <script src="../../js/main.js" defer></script>
+    <script type="module" src="../../js/tool-loader.js" defer></script>
+  </body>
+</html>
