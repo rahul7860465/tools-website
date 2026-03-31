@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
-const CANONICAL_BASE = "https://rahul7860465.github.io/tools-website";
+const CANONICAL_BASE = "https://toolgarage.netlify.app";
 
 const registry = JSON.parse(fs.readFileSync(path.join(ROOT, "tools.json"), "utf8"));
 const tools = registry.tools || [];

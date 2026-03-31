@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rahul7860465.github.io/tools-website/sitemap.xml
-
+Sitemap: https://toolgarage.netlify.app/sitemap.xml
