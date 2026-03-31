@@ -25,7 +25,7 @@
       "id": "password-generator",
       "name": "Password Generator",
       "description": "Generate strong passwords locally.",
-      "category": "Security Tools",
+      "category": "Utility Tools",
       "path": "./tools/password-generator/index.html",
       "icon": "password",
       "enabled": true,
@@ -312,6 +312,36 @@
       "premium": false
     },
     {
+      "id": "ai-humanizer",
+      "name": "AI Humanizer",
+      "description": "Make AI-generated text sound natural and human.",
+      "category": "AI Tools",
+      "path": "./tools/ai-humanizer/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "ai-detector",
+      "name": "AI Detector",
+      "description": "Estimate the probability of AI-written text.",
+      "category": "AI Tools",
+      "path": "./tools/ai-detector/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "paraphraser",
+      "name": "Paraphraser",
+      "description": "Rewrite text while preserving its original meaning.",
+      "category": "AI Tools",
+      "path": "./tools/paraphraser/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
       "id": "prompt-generator",
       "name": "Prompt Generator",
       "description": "Generate structured prompts for AI workflows.",
@@ -347,6 +377,56 @@
       "description": "Explain code in simple language section by section.",
       "category": "AI Tools",
       "path": "./tools/code-explainer/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "keyword-density-checker",
+      "name": "Keyword Density Checker",
+      "description": "Analyze keyword frequency and density percentage.",
+      "category": "SEO Tools",
+      "path": "./tools/keyword-density-checker/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "serp-preview",
+      "name": "SERP Preview Tool",
+      "description": "Preview title, URL, and description like Google results.",
+      "category": "SEO Tools",
+      "path": "./tools/serp-preview/index.html",
+      "icon": "html",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "plagiarism-checker",
+      "name": "Plagiarism Checker",
+      "description": "Find repeated or duplicate sentences in your content.",
+      "category": "SEO Tools",
+      "path": "./tools/plagiarism-checker/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "image-compressor",
+      "name": "Image Compressor",
+      "description": "Compress JPG, PNG, and WebP images in your browser.",
+      "category": "Utility Tools",
+      "path": "./tools/image-compressor/index.html",
+      "icon": "html",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "unit-converter",
+      "name": "Unit Converter",
+      "description": "Convert length, weight, temperature, data, and time units.",
+      "category": "Utility Tools",
+      "path": "./tools/unit-converter/index.html",
       "icon": "code",
       "enabled": true,
       "premium": false

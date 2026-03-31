@@ -175,6 +175,25 @@ a{color:inherit}
 .theme-toggle:hover{color:var(--text); background:rgba(255,255,255,.07)}
 .theme-toggle:focus{outline:none; box-shadow:var(--focus)}
 
+@media (max-width: 520px){
+  .header-row{
+    flex-wrap:wrap;
+    align-items:flex-start;
+  }
+  .site-nav{
+    width:100%;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .site-nav a,
+  .theme-toggle{
+    padding:6px 8px;
+  }
+  .plan-badge{
+    display:none;
+  }
+}
+
 .share-bar{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px}
 .share-bar .btn{padding:8px 10px; border-radius:11px; font-size:.95rem}
 .share-bar a.btn{color:inherit}

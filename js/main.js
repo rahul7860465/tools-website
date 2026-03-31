@@ -529,6 +529,7 @@
       <div class="card-meta">${tags.join("")}</div>
       <h3>${escapeHtml(tool.name || "")}</h3>
       <p>${escapeHtml(tool.description || "")}</p>
+      <span class="btn btn-small">Open tool</span>
     `.trim();
 
     return a;
@@ -793,19 +794,26 @@
     }
   }
 
-  function renderAiToolsSection() {
-    const root = document.getElementById("ai-tool-grid");
-    const section = document.getElementById("ai-tools");
-    if (!root || !section) return;
-    const aiTools = __tools.filter((t) => String(t.category || "") === "AI Tools");
-    if (!aiTools.length) {
-      section.style.display = "none";
-      return;
-    }
-    section.style.display = "";
-    root.innerHTML = "";
-    for (const t of aiTools) {
-      root.appendChild(buildCard(t, { pathIsRelativeToCurrent: true }));
+  function renderMainCategorySections() {
+    const sections = [
+      { sectionId: "ai-tools", gridId: "ai-tool-grid", category: "AI Tools" },
+      { sectionId: "seo-tools", gridId: "seo-tool-grid", category: "SEO Tools" },
+      { sectionId: "utility-tools", gridId: "utility-tool-grid", category: "Utility Tools" },
+    ];
+    for (const cfg of sections) {
+      const root = document.getElementById(cfg.gridId);
+      const section = document.getElementById(cfg.sectionId);
+      if (!root || !section) continue;
+      const list = __tools.filter((t) => String(t.category || "") === cfg.category);
+      if (!list.length) {
+        section.style.display = "none";
+        continue;
+      }
+      section.style.display = "";
+      root.innerHTML = "";
+      for (const t of list) {
+        root.appendChild(buildCard(t, { pathIsRelativeToCurrent: true }));
+      }
     }
   }
 
@@ -1127,7 +1135,7 @@
 
       // Homepage: popular tools.
       renderPopularTools();
-      renderAiToolsSection();
+      renderMainCategorySections();
       initSmartAnalyze();
       if (meta && !document.getElementById("tool-search")) {
         meta.textContent = `${__tools.length} tools`;
