@@ -10,6 +10,9 @@
     "test:ui": "playwright test --ui",
     "build": "node build.mjs",
     "seo": "node scripts/apply-tool-seo.mjs",
+    "seo:generate": "node scripts/generate-seo-pages.mjs",
+    "seo:boost": "node scripts/boost-seo-head.mjs",
+    "sitemap:refresh": "node scripts/refresh-sitemap.mjs",
     "preview": "node serve.js",
     "preview:dist": "set ROOT=dist&& node serve.js"
   },
