@@ -212,6 +212,54 @@ a{color:inherit}
 .hero h1{margin:0 0 8px; font-size: clamp(1.45rem, 2.6vw, 2.2rem); line-height:1.1}
 .hero-sub{margin:0; color:var(--muted); max-width:64ch}
 .hero-actions{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+.hero-top{
+  display:grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, .9fr);
+  gap:16px;
+  align-items:stretch;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 8px;
+  font-weight:700;
+  letter-spacing:.3px;
+  color:#bcd6ff;
+}
+.workspace-status{
+  border-color: rgba(106,166,255,.22);
+  background: linear-gradient(180deg, rgba(106,166,255,.12), rgba(79,125,255,.08));
+}
+.status-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:8px;
+}
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid rgba(106,166,255,.35);
+  background: rgba(106,166,255,.14);
+  font-size:.85rem;
+}
+.status-pill.ok{
+  border-color: rgba(95,213,152,.45);
+  background: rgba(95,213,152,.18);
+  color:#c5ffd9;
+}
+.status-pill.off{
+  border-color: rgba(255,185,102,.45);
+  background: rgba(255,185,102,.18);
+  color:#ffe5bb;
+}
+.workflows-grid .panel{
+  min-height: 190px;
+}
 
 /* Home layout priority */
 .home-main{
@@ -219,10 +267,17 @@ a{color:inherit}
   flex-direction:column;
 }
 .home-main #smart-analyze{order:1}
-.home-main #advanced-lab{order:2}
-.home-main #tools{order:3}
-.home-main #popular{order:4}
+.home-main #featured-workflows{order:2}
+.home-main #advanced-lab{order:3}
+.home-main #tools{order:4}
+.home-main #popular{order:5}
 .home-main #about{order:6}
+
+@media (max-width: 980px){
+  .hero-top{
+    grid-template-columns: 1fr;
+  }
+}
 
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:8px;

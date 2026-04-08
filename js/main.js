@@ -1117,6 +1117,23 @@
     renderCapsules();
   }
 
+  function initLocalAiBadge() {
+    const badge = document.getElementById("local-ai-badge");
+    if (!badge) return;
+    try {
+      const raw = localStorage.getItem("toolbox_ai_settings_v1");
+      const parsed = raw ? JSON.parse(raw) : null;
+      const enabled = Boolean(parsed?.enabled);
+      badge.textContent = enabled ? "Connected (configured)" : "Offline / disabled";
+      badge.classList.remove("ok", "off");
+      badge.classList.add(enabled ? "ok" : "off");
+    } catch {
+      badge.textContent = "Offline / disabled";
+      badge.classList.remove("ok");
+      badge.classList.add("off");
+    }
+  }
+
   async function initRegistry() {
     const meta = document.getElementById("tools-meta");
     try {
@@ -1137,6 +1154,7 @@
       renderPopularTools();
       renderMainCategorySections();
       initSmartAnalyze();
+      initLocalAiBadge();
       if (meta && !document.getElementById("tool-search")) {
         meta.textContent = `${__tools.length} tools`;
       }
