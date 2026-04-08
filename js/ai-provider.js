@@ -99,7 +99,7 @@ export async function listLocalModels(signal) {
   return models.map((m) => String(m?.name || "")).filter(Boolean);
 }
 
-export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperature = 0.3, maxTokens = 700, signal } = {}) {
+export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperature = 0.3, maxTokens = 700, signal, model } = {}) {
   const s = getLocalAISettings();
   if (!s.enabled) throw new Error("Local AI mode is disabled.");
   const base = String(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
@@ -107,6 +107,7 @@ export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperatu
   if (!prompt) throw new Error("Prompt is empty.");
   let data = null;
   let lastErr = null;
+  let modelToUse = String(model || s.model);
   const attempts = Math.max(0, Number(s.retryAttempts) || 0) + 1;
   for (let i = 0; i < attempts; i += 1) {
     const ts = timeoutSignal(s.timeoutMs, signal);
@@ -114,7 +115,7 @@ export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperatu
       data = await postJson(
         `${base}/api/generate`,
         {
-          model: s.model,
+          model: modelToUse,
           prompt,
           stream: false,
           options: {
@@ -130,6 +131,17 @@ export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperatu
     } catch (e) {
       ts.cleanup();
       lastErr = e;
+      // If model missing/not found on this Ollama, fallback to first available model.
+      if (/404/.test(String(e?.message || ""))) {
+        try {
+          const available = await listLocalModels(signal);
+          if (available.length && available[0] && available[0] !== modelToUse) {
+            modelToUse = String(available[0]);
+          }
+        } catch {
+          // ignore fallback lookup errors
+        }
+      }
       if (i < attempts - 1) await delay(250);
     }
   }
@@ -146,6 +158,7 @@ export async function runLocalAIStream({
   maxTokens = 700,
   signal,
   onToken,
+  model,
 } = {}) {
   const s = getLocalAISettings();
   if (!s.enabled) throw new Error("Local AI mode is disabled.");
@@ -154,6 +167,7 @@ export async function runLocalAIStream({
   if (!prompt) throw new Error("Prompt is empty.");
 
   const attempts = Math.max(0, Number(s.retryAttempts) || 0) + 1;
+  let modelToUse = String(model || s.model);
   let lastErr = null;
   for (let i = 0; i < attempts; i += 1) {
     const ts = timeoutSignal(s.timeoutMs, signal);
@@ -162,7 +176,7 @@ export async function runLocalAIStream({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: s.model,
+          model: modelToUse,
           prompt,
           stream: true,
           options: {
@@ -212,6 +226,16 @@ export async function runLocalAIStream({
     } catch (e) {
       ts.cleanup();
       lastErr = e;
+      if (/404/.test(String(e?.message || ""))) {
+        try {
+          const available = await listLocalModels(signal);
+          if (available.length && available[0] && available[0] !== modelToUse) {
+            modelToUse = String(available[0]);
+          }
+        } catch {
+          // ignore fallback lookup errors
+        }
+      }
       if (i < attempts - 1) await delay(250);
     }
   }
@@ -310,6 +334,162 @@ export function attachLocalAIControls({ statusEl } = {}) {
       model: model.value || settings.model,
     });
     if (statusEl) setText(statusEl, saved.enabled ? "Local AI enabled." : "Local AI disabled.");
+  });
+}
+
+function readToolContext() {
+  const fields = [
+    "#input",
+    "#output",
+    "#outputText",
+    "#result",
+    "#topic",
+    "#audience",
+    "#goal",
+    "#code",
+  ];
+  const chunks = [];
+  for (const sel of fields) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    const value = "value" in el ? String(el.value || "").trim() : String(el.textContent || "").trim();
+    if (!value) continue;
+    chunks.push(`${sel}:\n${value}`);
+  }
+  return chunks.join("\n\n").trim();
+}
+
+export function attachUniversalAIAssistant() {
+  const actions = qs(".actions");
+  if (!actions || document.getElementById("universal-ai-assistant")) return;
+
+  const panel = document.createElement("details");
+  panel.id = "universal-ai-assistant";
+  panel.className = "panel";
+  panel.style.marginTop = "12px";
+
+  const summary = document.createElement("summary");
+  summary.style.cursor = "pointer";
+  summary.style.padding = "10px 12px";
+  summary.innerHTML = "<strong>AI Assistant (Ollama for any tool)</strong> <span class=\"muted\">Use local AI with current tool context</span>";
+  panel.appendChild(summary);
+
+  const body = document.createElement("div");
+  body.className = "panel-body";
+  body.style.display = "grid";
+  body.style.gap = "10px";
+
+  const prompt = document.createElement("textarea");
+  prompt.id = "ua-prompt";
+  prompt.placeholder = "Ask AI to help with this tool output/input. Example: explain result, improve text, suggest next steps.";
+  prompt.style.minHeight = "110px";
+
+  const useCtxRow = document.createElement("label");
+  useCtxRow.className = "muted";
+  useCtxRow.style.display = "flex";
+  useCtxRow.style.alignItems = "center";
+  useCtxRow.style.gap = "8px";
+  useCtxRow.innerHTML = '<input id="ua-use-context" type="checkbox" checked /> Include current tool context';
+
+  const aiOut = document.createElement("pre");
+  aiOut.id = "ua-output";
+  aiOut.className = "output";
+  aiOut.style.minHeight = "120px";
+
+  const status = document.createElement("div");
+  status.id = "ua-status";
+  status.className = "notice";
+  status.style.display = "none";
+
+  const row = document.createElement("div");
+  row.className = "actions";
+  const run = document.createElement("button");
+  run.type = "button";
+  run.className = "btn btn-small btn-primary";
+  run.textContent = "Run Local AI";
+  const stop = document.createElement("button");
+  stop.type = "button";
+  stop.className = "btn btn-small btn-danger";
+  stop.textContent = "Stop";
+  stop.style.display = "none";
+  const copy = document.createElement("button");
+  copy.type = "button";
+  copy.className = "btn btn-small";
+  copy.textContent = "Copy AI Output";
+  row.appendChild(run);
+  row.appendChild(stop);
+  row.appendChild(copy);
+
+  body.appendChild(prompt);
+  body.appendChild(useCtxRow);
+  body.appendChild(row);
+  body.appendChild(aiOut);
+  body.appendChild(status);
+  panel.appendChild(body);
+  actions.parentElement?.appendChild(panel);
+
+  let ctrl = null;
+  const show = (msg, err = false) => {
+    status.style.display = msg ? "" : "none";
+    status.style.borderColor = err ? "rgba(255,120,120,.35)" : "rgba(106,166,255,.25)";
+    status.style.background = err ? "rgba(255,120,120,.10)" : "rgba(106,166,255,.08)";
+    setText(status, msg);
+  };
+
+  run.addEventListener("click", async () => {
+    try {
+      const settings = getLocalAISettings();
+      if (!settings.enabled) {
+        show("Enable Local AI settings first in this page.", true);
+        return;
+      }
+      const q = String(prompt.value || "").trim();
+      if (!q) {
+        show("Enter your AI request.", true);
+        return;
+      }
+      const useContext = Boolean(qs("#ua-use-context")?.checked);
+      const ctx = useContext ? readToolContext() : "";
+      const userPrompt = ctx ? `Context from current tool:\n${ctx}\n\nUser request:\n${q}` : q;
+      setText(aiOut, "");
+      show("Streaming response from local AI...");
+      ctrl = new AbortController();
+      run.style.display = "none";
+      stop.style.display = "";
+      await runLocalAIStream({
+        systemPrompt:
+          "You are a practical assistant helping users on a web tool page. Keep answers clear and directly useful for the current tool.",
+        userPrompt,
+        signal: ctrl.signal,
+        onToken: (_chunk, full) => setText(aiOut, full),
+      });
+      show("Local AI response ready.");
+    } catch (e) {
+      const aborted = e && (e.name === "AbortError" || /aborted/i.test(String(e.message || "")));
+      show(aborted ? "AI response stopped." : e instanceof Error ? e.message : "Local AI failed.", !aborted);
+    } finally {
+      run.style.display = "";
+      stop.style.display = "none";
+      ctrl = null;
+    }
+  });
+
+  stop.addEventListener("click", () => {
+    if (ctrl) ctrl.abort();
+  });
+
+  copy.addEventListener("click", async () => {
+    const txt = String(aiOut.textContent || "").trim();
+    if (!txt) {
+      show("No AI output to copy.", true);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(txt);
+      show("AI output copied.");
+    } catch {
+      show("Copy failed in this browser context.", true);
+    }
   });
 }
 

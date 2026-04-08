@@ -382,6 +382,16 @@
       "premium": false
     },
     {
+      "id": "ai-diagnostics",
+      "name": "AI Diagnostics",
+      "description": "Check Ollama connection, models, and streaming health.",
+      "category": "AI Tools",
+      "path": "./tools/ai-diagnostics/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
       "id": "keyword-density-checker",
       "name": "Keyword Density Checker",
       "description": "Analyze keyword frequency and density percentage.",

@@ -64,6 +64,8 @@
   const WORKSPACE_SESSION_KEY = "toolbox_workspace_session_v1";
   const THEME_PRESET_KEY = "toolbox_theme_preset_v1";
   const FUN_MODE_KEY = "toolbox_fun_mode_v1";
+  const AGENT_MEMORY_KEY = "toolbox_agent_memory_v1";
+  const AGENT_PROFILE_KEY = "toolbox_agent_profile_v1";
 
   function loadStats() {
     try {
@@ -1678,6 +1680,621 @@
       const current = document.documentElement.getAttribute("data-fun-mode") === "on";
       setFun(!current);
     });
+  })();
+
+  (function initGlobalOllamaAgent() {
+    const mount = document.body;
+    if (!mount || document.getElementById("site-ai-agent")) return;
+
+    const launcher = document.createElement("button");
+    launcher.id = "site-ai-agent";
+    launcher.type = "button";
+    launcher.className = "btn btn-primary agent-launcher";
+    launcher.textContent = "AI Agent";
+    launcher.setAttribute("aria-label", "Open AI agent");
+
+    const panel = document.createElement("section");
+    panel.className = "agent-panel";
+    panel.hidden = true;
+    panel.innerHTML = `
+      <div class="agent-head">
+        <strong>Ollama Agent</strong>
+        <button type="button" class="btn btn-small" id="agent-close">Close</button>
+      </div>
+      <div id="agent-log" class="agent-log">
+        <div class="agent-msg">Hi! I can help with any page on this site. Ask me to explain this tool, improve text, or suggest next actions.</div>
+      </div>
+      <div class="agent-compose">
+        <div class="actions">
+          <select id="agent-model" class="input" style="max-width:220px"><option value="">Default model</option></select>
+          <select id="agent-profile" class="input" style="max-width:170px">
+            <option value="general">General</option>
+            <option value="student">Student</option>
+            <option value="marketing">Marketing</option>
+            <option value="founder">Founder</option>
+            <option value="developer">Developer</option>
+          </select>
+          <button type="button" class="btn btn-small" id="agent-refresh-models">Refresh models</button>
+          <label class="muted" style="display:flex;align-items:center;gap:6px"><input id="agent-memory" type="checkbox" checked/> Memory</label>
+          <label class="muted" style="display:flex;align-items:center;gap:6px"><input id="agent-json-mode" type="checkbox"/> JSON actions</label>
+        </div>
+        <div class="agent-quick">
+          <button type="button" class="btn btn-small" data-agent-quick="Explain this page and how to use it">Explain this page</button>
+          <button type="button" class="btn btn-small" data-agent-quick="Suggest best next 3 tools for this task">Best next tools</button>
+          <button type="button" class="btn btn-small" data-agent-quick="Improve my text in current input">Improve input text</button>
+        </div>
+        <textarea id="agent-input" placeholder="Ask anything for this website/tool..."></textarea>
+        <div class="actions">
+          <button type="button" class="btn btn-small btn-primary" id="agent-send">Run with Ollama</button>
+          <button type="button" class="btn btn-small" id="agent-voice">Voice</button>
+          <button type="button" class="btn btn-small btn-danger" id="agent-stop" style="display:none">Stop</button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-small" id="agent-apply-input">Use in input</button>
+          <button type="button" class="btn btn-small" id="agent-copy-last">Copy answer</button>
+        </div>
+        <div class="agent-advanced">
+          <div class="actions">
+            <button type="button" class="btn btn-small" id="agent-autofill">Auto-fill fields</button>
+            <button type="button" class="btn btn-small" id="agent-autorun">Auto-run tool</button>
+            <button type="button" class="btn btn-small btn-primary" id="agent-autopilot">Autopilot</button>
+            <button type="button" class="btn btn-small" id="agent-exec-json">Execute JSON actions</button>
+            <button type="button" class="btn btn-small" id="agent-plan">Build workflow plan</button>
+            <button type="button" class="btn btn-small" id="agent-score">Score output</button>
+          </div>
+          <div id="agent-plan-output" class="agent-plan" style="display:none"></div>
+          <div id="agent-score-output" class="agent-score-grid" style="display:none"></div>
+        </div>
+        <div id="agent-tools" class="agent-quick"></div>
+      </div>
+    `;
+
+    mount.appendChild(panel);
+    mount.appendChild(launcher);
+
+    const log = panel.querySelector("#agent-log");
+    const input = panel.querySelector("#agent-input");
+    const send = panel.querySelector("#agent-send");
+    const stop = panel.querySelector("#agent-stop");
+    const close = panel.querySelector("#agent-close");
+    const voice = panel.querySelector("#agent-voice");
+    const applyInputBtn = panel.querySelector("#agent-apply-input");
+    const copyLastBtn = panel.querySelector("#agent-copy-last");
+    const modelSelect = panel.querySelector("#agent-model");
+    const profileSelect = panel.querySelector("#agent-profile");
+    const refreshModels = panel.querySelector("#agent-refresh-models");
+    const memoryToggle = panel.querySelector("#agent-memory");
+    const jsonModeToggle = panel.querySelector("#agent-json-mode");
+    const toolsRow = panel.querySelector("#agent-tools");
+    const autoFillBtn = panel.querySelector("#agent-autofill");
+    const autoRunBtn = panel.querySelector("#agent-autorun");
+    const autopilotBtn = panel.querySelector("#agent-autopilot");
+    const execJsonBtn = panel.querySelector("#agent-exec-json");
+    const planBtn = panel.querySelector("#agent-plan");
+    const scoreBtn = panel.querySelector("#agent-score");
+    const planOut = panel.querySelector("#agent-plan-output");
+    const scoreOut = panel.querySelector("#agent-score-output");
+    let activeController = null;
+    let lastAssistantText = "";
+
+    const loadMemory = () => {
+      try {
+        const raw = localStorage.getItem(AGENT_MEMORY_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch {
+        return [];
+      }
+    };
+    const saveMemory = (rows) => {
+      try {
+        localStorage.setItem(AGENT_MEMORY_KEY, JSON.stringify(rows.slice(-8)));
+      } catch {
+        // ignore
+      }
+    };
+    const getProfile = () => {
+      const v = String(profileSelect?.value || "general");
+      return ["general", "student", "marketing", "founder", "developer"].includes(v) ? v : "general";
+    };
+    const profileSystemPrompt = (profile) => {
+      if (profile === "student") return "You are a student success coach. Give simple steps, examples, and beginner-friendly language.";
+      if (profile === "marketing") return "You are a marketing growth expert. Optimize for conversion, clarity, and actionable campaign steps.";
+      if (profile === "founder") return "You are a startup founder copilot. Focus on speed, decision quality, and practical business outcomes.";
+      if (profile === "developer") return "You are a senior engineering copilot. Give precise technical guidance and safe implementation steps.";
+      return "You are a practical AI copilot for productivity tools.";
+    };
+
+    const appendMsg = (text, kind = "assistant") => {
+      if (!log) return null;
+      const row = document.createElement("div");
+      row.className = `agent-msg ${kind === "user" ? "user" : ""}`;
+      row.textContent = String(text || "");
+      log.appendChild(row);
+      log.scrollTop = log.scrollHeight;
+      return row;
+    };
+
+    const pageContext = () => {
+      const title = document.title || "Toolbox page";
+      const h1 = (document.querySelector("h1")?.textContent || "").trim();
+      const inputText =
+        (document.querySelector("#input")?.value || "").toString().trim().slice(0, 1500) ||
+        (document.querySelector("textarea")?.value || "").toString().trim().slice(0, 1500);
+      return `Page title: ${title}\nMain heading: ${h1}\nPath: ${window.location.pathname}\nInput snapshot:\n${inputText || "(empty)"}`;
+    };
+
+    const parseAutoFill = (text) => {
+      const out = [];
+      const lines = String(text || "").split(/\r?\n/);
+      for (const line of lines) {
+        const m = line.match(/^\s*([a-zA-Z0-9_-]+)\s*:\s*(.+)$/);
+        if (!m) continue;
+        out.push({ key: m[1].toLowerCase(), value: m[2].trim() });
+      }
+      return out;
+    };
+
+    const applyToBestField = (key, value) => {
+      const map = {
+        topic: "#topic",
+        audience: "#audience",
+        goal: "#goal",
+        input: "#input",
+        code: "#input",
+        text: "#input",
+        prompt: "#input",
+      };
+      const sel = map[key] || `#${key}`;
+      const el = document.querySelector(sel);
+      if (!el || !("value" in el)) return false;
+      el.value = value;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      return true;
+    };
+
+    const autoRunTool = () => {
+      const candidates = ["#generate", "#optimize", "#run", "#format", "#calc", "#calculate", "#explain", "#encode"];
+      for (const sel of candidates) {
+        const btn = document.querySelector(sel);
+        if (btn && typeof btn.click === "function") {
+          btn.click();
+          return sel;
+        }
+      }
+      return "";
+    };
+
+    const extractJsonActions = (text) => {
+      const raw = String(text || "").trim();
+      if (!raw) return null;
+      const fenced = raw.match(/```json\s*([\s\S]*?)```/i) || raw.match(/```\s*([\s\S]*?)```/i);
+      const candidate = fenced ? fenced[1].trim() : raw;
+      try {
+        const parsed = JSON.parse(candidate);
+        const actions = Array.isArray(parsed?.actions) ? parsed.actions : Array.isArray(parsed) ? parsed : null;
+        return actions;
+      } catch {
+        return null;
+      }
+    };
+
+    const executeJsonActions = (actions) => {
+      if (!Array.isArray(actions) || !actions.length) {
+        appendMsg("No valid JSON actions found.");
+        return;
+      }
+      let executed = 0;
+      for (const a of actions.slice(0, 12)) {
+        const type = String(a?.type || "").toLowerCase();
+        const selector = String(a?.selector || "");
+        if (type === "navigate") {
+          const target = String(a?.url || "").trim();
+          if (!target) continue;
+          if (/^https?:\/\//i.test(target)) {
+            const u = new URL(target, window.location.href);
+            if (u.origin !== window.location.origin) continue;
+            window.location.href = u.toString();
+            executed += 1;
+            break;
+          } else {
+            window.location.href = target.startsWith("/") ? target : `./${target}`;
+            executed += 1;
+            break;
+          }
+        }
+        if (!selector) continue;
+        const el = document.querySelector(selector);
+        if (!el) continue;
+        if (type === "fill" || type === "set_text") {
+          const value = String(a?.value ?? a?.text ?? "");
+          if ("value" in el) {
+            el.value = value;
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+            executed += 1;
+          } else {
+            el.textContent = value;
+            executed += 1;
+          }
+        } else if (type === "click") {
+          if (typeof el.click === "function") {
+            el.click();
+            executed += 1;
+          }
+        }
+      }
+      appendMsg(executed ? `Executed ${executed} JSON action(s).` : "JSON actions could not be executed.");
+    };
+
+    const scoreText = (text) => {
+      const t = String(text || "").trim();
+      if (!t) return null;
+      const words = t.split(/\s+/).filter(Boolean);
+      const sentences = t.split(/[.!?]+/).map((x) => x.trim()).filter(Boolean);
+      const avgSentence = sentences.length ? words.length / sentences.length : words.length;
+      const actionHits = (t.match(/\b(create|build|use|click|write|optimize|improve|plan|run|check)\b/gi) || []).length;
+      const clarity = Math.max(40, Math.min(100, Math.round(100 - Math.abs(avgSentence - 16) * 2)));
+      const actionability = Math.max(35, Math.min(100, 40 + actionHits * 6));
+      const structure = /(\n- |\n\d+\)|\n\d+\.)/.test(t) ? 90 : 62;
+      const brevity = words.length <= 220 ? 88 : Math.max(45, 88 - Math.round((words.length - 220) / 8));
+      return { clarity, actionability, structure, brevity };
+    };
+
+    const suggestTools = (text) => {
+      if (!toolsRow) return;
+      const q = String(text || "").toLowerCase();
+      const source = Array.isArray(__tools) ? __tools : [];
+      const picks = source
+        .filter((t) => q.includes(String(t.name || "").toLowerCase()) || q.includes(String(t.id || "").toLowerCase()))
+        .slice(0, 3);
+      if (!picks.length) {
+        toolsRow.innerHTML = "";
+        return;
+      }
+      toolsRow.innerHTML = picks
+        .map((t) => `<a class="btn btn-small" href="./tools/${escapeHtml(t.id)}/index.html">Open ${escapeHtml(t.name)}</a>`)
+        .join("");
+    };
+
+    const setOpen = (open) => {
+      panel.hidden = !open;
+      launcher.textContent = open ? "AI Agent Open" : "AI Agent";
+      if (open) input?.focus();
+    };
+    launcher.addEventListener("click", () => setOpen(panel.hidden));
+    close?.addEventListener("click", () => setOpen(false));
+
+    panel.querySelectorAll("[data-agent-quick]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const txt = String(btn.getAttribute("data-agent-quick") || "").trim();
+        if (input) input.value = txt;
+      });
+    });
+
+    const initModelPicker = async () => {
+      let ai;
+      try {
+        ai = await import(new URL("js/ai-provider.js", SITE_ROOT_URL).toString());
+      } catch {
+        return;
+      }
+      const settings = ai?.getLocalAISettings?.();
+      if (!modelSelect) return;
+      modelSelect.innerHTML = `<option value="">${escapeHtml(settings?.model || "Default model")}</option>`;
+      refreshModels?.addEventListener("click", async () => {
+        try {
+          const list = await ai.listLocalModels();
+          modelSelect.innerHTML = "";
+          if (!list.length) {
+            modelSelect.innerHTML = `<option value="">${escapeHtml(settings?.model || "Default model")}</option>`;
+            return;
+          }
+          list.forEach((m) => {
+            const opt = document.createElement("option");
+            opt.value = m;
+            opt.textContent = m;
+            if (m === settings?.model) opt.selected = true;
+            modelSelect.appendChild(opt);
+          });
+        } catch {
+          // ignore
+        }
+      });
+    };
+    initModelPicker();
+    try {
+      const savedProfile = localStorage.getItem(AGENT_PROFILE_KEY) || "general";
+      if (profileSelect) profileSelect.value = savedProfile;
+    } catch {
+      // ignore
+    }
+    profileSelect?.addEventListener("change", () => {
+      try {
+        localStorage.setItem(AGENT_PROFILE_KEY, getProfile());
+      } catch {
+        // ignore
+      }
+    });
+
+    const runAgent = async () => {
+      const question = String(input?.value || "").trim();
+      if (!question) return;
+      appendMsg(question, "user");
+      if (input) input.value = "";
+
+      let ai;
+      try {
+        ai = await import(new URL("js/ai-provider.js", SITE_ROOT_URL).toString());
+      } catch {
+        appendMsg("AI provider failed to load.");
+        return;
+      }
+      const settings = ai?.getLocalAISettings?.();
+      if (!settings?.enabled) {
+        appendMsg("Local AI is disabled. Open any tool and enable Local AI (Ollama) first.");
+        return;
+      }
+
+      const assistantRow = appendMsg("Thinking with local Ollama...");
+      activeController = new AbortController();
+      send.style.display = "none";
+      stop.style.display = "";
+      try {
+        const memoryEnabled = Boolean(memoryToggle?.checked);
+        const memoryRows = memoryEnabled ? loadMemory() : [];
+        const memoryText = memoryRows.length
+          ? `Recent conversation:\n${memoryRows.map((r) => `${r.role}: ${r.text}`).join("\n")}\n\n`
+          : "";
+        const selectedModel = String(modelSelect?.value || "").trim();
+        const jsonMode = Boolean(jsonModeToggle?.checked);
+        const profile = getProfile();
+        await ai.runLocalAIStream({
+          systemPrompt:
+            jsonMode
+              ? 'You are a website automation agent for Toolbox. Output ONLY strict JSON object: {"actions":[{"type":"fill|set_text|click|navigate","selector":"#id or .class (if needed)","value":"text (for fill/set_text)","url":"path or same-origin url (for navigate)"}],"note":"short summary"}. Do not include markdown.'
+              : `You are the website AI agent for Toolbox. ${profileSystemPrompt(profile)} Give concise, practical help and suggest specific tools/routes in this website.`,
+          userPrompt: `${pageContext()}\n\n${memoryText}User request:\n${question}`,
+          signal: activeController.signal,
+          ...(selectedModel ? { model: selectedModel } : {}),
+          onToken: (_chunk, full) => {
+            lastAssistantText = full;
+            if (assistantRow) assistantRow.textContent = full;
+          },
+        });
+        if (memoryEnabled) {
+          const merged = [...loadMemory(), { role: "user", text: question }, { role: "assistant", text: lastAssistantText || "" }];
+          saveMemory(merged);
+        }
+        suggestTools(lastAssistantText);
+      } catch (e) {
+        const aborted = e && (e.name === "AbortError" || /aborted/i.test(String(e.message || "")));
+        if (assistantRow) assistantRow.textContent = aborted ? "Agent stopped." : `Agent error: ${e?.message || "Failed"}`;
+      } finally {
+        activeController = null;
+        send.style.display = "";
+        stop.style.display = "none";
+      }
+    };
+
+    send?.addEventListener("click", runAgent);
+    input?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        runAgent();
+      }
+    });
+    stop?.addEventListener("click", () => {
+      if (activeController) activeController.abort();
+    });
+
+    applyInputBtn?.addEventListener("click", () => {
+      const txt = String(lastAssistantText || "").trim();
+      if (!txt) return;
+      const target = document.querySelector("#input, textarea");
+      if (target && "value" in target) {
+        target.value = txt;
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    copyLastBtn?.addEventListener("click", async () => {
+      const txt = String(lastAssistantText || "").trim();
+      if (!txt) return;
+      try {
+        await navigator.clipboard.writeText(txt);
+      } catch {
+        // ignore
+      }
+    });
+
+    autoFillBtn?.addEventListener("click", () => {
+      const txt = String(lastAssistantText || "").trim();
+      if (!txt) {
+        appendMsg("No assistant output available for auto-fill.");
+        return;
+      }
+      const pairs = parseAutoFill(txt);
+      let count = 0;
+      for (const p of pairs) {
+        if (applyToBestField(p.key, p.value)) count += 1;
+      }
+      if (!count && txt) {
+        const el = document.querySelector("#input, textarea");
+        if (el && "value" in el) {
+          el.value = txt;
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          count = 1;
+        }
+      }
+      appendMsg(count ? `Auto-fill applied to ${count} field(s).` : "Auto-fill could not match fields.");
+    });
+
+    autoRunBtn?.addEventListener("click", () => {
+      const hit = autoRunTool();
+      appendMsg(hit ? `Auto-run clicked ${hit}.` : "No runnable action found on this page.");
+    });
+
+    execJsonBtn?.addEventListener("click", () => {
+      const actions = extractJsonActions(lastAssistantText);
+      executeJsonActions(actions);
+    });
+
+    planBtn?.addEventListener("click", () => {
+      const path = window.location.pathname;
+      const plans = [];
+      if (/prompt-generator/.test(path)) {
+        plans.push("1) Fill topic, audience, goal", "2) Click Generate", "3) Send output to Prompt Optimizer", "4) Validate token usage");
+      } else if (/prompt-optimizer/.test(path)) {
+        plans.push("1) Paste prompt", "2) Click Optimize", "3) Check clarity + constraints", "4) Copy final prompt");
+      } else if (/token-counter/.test(path)) {
+        plans.push("1) Paste content", "2) Review tokens", "3) Reduce length if needed");
+      } else if (/code-explainer/.test(path)) {
+        plans.push("1) Paste code", "2) Click Explain", "3) Copy summary", "4) Refine with follow-up ask");
+      } else {
+        plans.push("1) Choose a tool category", "2) Open relevant tool", "3) Use AI Agent quick prompts", "4) Apply output and run tool");
+      }
+      if (planOut) {
+        planOut.style.display = "";
+        planOut.textContent = plans.join("\n");
+      }
+    });
+
+    scoreBtn?.addEventListener("click", () => {
+      const s = scoreText(lastAssistantText);
+      if (!s || !scoreOut) {
+        appendMsg("No assistant output available to score.");
+        return;
+      }
+      scoreOut.style.display = "grid";
+      scoreOut.innerHTML = `
+        <div class="agent-score"><div class="k">Clarity</div><div class="v">${s.clarity}/100</div></div>
+        <div class="agent-score"><div class="k">Actionability</div><div class="v">${s.actionability}/100</div></div>
+        <div class="agent-score"><div class="k">Structure</div><div class="v">${s.structure}/100</div></div>
+        <div class="agent-score"><div class="k">Brevity</div><div class="v">${s.brevity}/100</div></div>
+      `;
+    });
+
+    autopilotBtn?.addEventListener("click", async () => {
+      const path = window.location.pathname;
+      const autoPrompt =
+        /prompt-generator/.test(path)
+          ? "Create high quality values for topic, audience and goal for a landing page AI prompt. Return plain lines as key:value."
+          : /prompt-optimizer/.test(path)
+          ? "Rewrite current input into a better prompt. Keep concise and actionable."
+          : /token-counter/.test(path)
+          ? "Suggest a shorter version of the current input with same meaning."
+          : /code-explainer/.test(path)
+          ? "Explain current code in 5 bullet points for beginners."
+          : "Analyze this page and provide best next action for the user.";
+      if (input) input.value = autoPrompt;
+      await runAgent();
+      const pairs = parseAutoFill(lastAssistantText);
+      let filled = 0;
+      pairs.forEach((p) => {
+        if (applyToBestField(p.key, p.value)) filled += 1;
+      });
+      const hit = autoRunTool();
+      appendMsg(`Autopilot done. Filled ${filled} fields.${hit ? ` Ran ${hit}.` : ""}`);
+    });
+
+    voice?.addEventListener("click", () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        appendMsg("Voice input is not supported in this browser.");
+        return;
+      }
+      const rec = new SR();
+      rec.lang = "en-US";
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.onresult = (ev) => {
+        const t = ev?.results?.[0]?.[0]?.transcript || "";
+        if (input) input.value = String(t);
+      };
+      rec.onerror = () => appendMsg("Voice input failed. Try again.");
+      rec.start();
+    });
+  })();
+
+  (function initToolAIPowerBar() {
+    const slug = toolSlugFromPath(window.location.pathname);
+    if (!slug) return; // only on tool pages
+    const toolHead = document.querySelector(".tool-head");
+    if (!toolHead || document.getElementById("tool-ai-power")) return;
+
+    const bar = document.createElement("div");
+    bar.id = "tool-ai-power";
+    bar.className = "tool-ai-power";
+    bar.innerHTML = `
+      <div class="rowline">
+        <strong>AI Power (Ollama)</strong>
+        <span class="state"><span id="tool-ai-dot" class="dot"></span><span id="tool-ai-state">Checking...</span></span>
+      </div>
+      <div class="actions" style="margin-top:8px">
+        <button type="button" class="btn btn-small btn-primary" id="tool-ai-enable">Enable Local AI</button>
+        <button type="button" class="btn btn-small" id="tool-ai-open">Open AI Agent</button>
+        <button type="button" class="btn btn-small" id="tool-ai-explain">Analyze This Tool Page</button>
+      </div>
+    `;
+    toolHead.appendChild(bar);
+
+    const dot = bar.querySelector("#tool-ai-dot");
+    const state = bar.querySelector("#tool-ai-state");
+    const enableBtn = bar.querySelector("#tool-ai-enable");
+    const openBtn = bar.querySelector("#tool-ai-open");
+    const explainBtn = bar.querySelector("#tool-ai-explain");
+
+    const refreshState = async () => {
+      try {
+        const ai = await import(new URL("js/ai-provider.js", SITE_ROOT_URL).toString());
+        const s = ai.getLocalAISettings();
+        if (!s.enabled) {
+          if (dot) dot.classList.remove("ok");
+          if (state) state.textContent = "Local AI is OFF";
+          return;
+        }
+        try {
+          const models = await ai.listLocalModels();
+          if (dot) dot.classList.add("ok");
+          if (state) state.textContent = models.length ? `ON • ${models[0]}` : "ON • no model";
+        } catch {
+          if (dot) dot.classList.remove("ok");
+          if (state) state.textContent = "ON but endpoint not reachable";
+        }
+      } catch {
+        if (dot) dot.classList.remove("ok");
+        if (state) state.textContent = "AI module unavailable";
+      }
+    };
+
+    enableBtn?.addEventListener("click", async () => {
+      try {
+        const ai = await import(new URL("js/ai-provider.js", SITE_ROOT_URL).toString());
+        const current = ai.getLocalAISettings();
+        ai.setLocalAISettings({ ...current, enabled: true });
+        await refreshState();
+      } catch {
+        // ignore
+      }
+    });
+
+    openBtn?.addEventListener("click", () => {
+      const launcher = document.getElementById("site-ai-agent");
+      if (launcher) launcher.click();
+    });
+
+    explainBtn?.addEventListener("click", () => {
+      const launcher = document.getElementById("site-ai-agent");
+      if (launcher) launcher.click();
+      window.setTimeout(() => {
+        const input = document.getElementById("agent-input");
+        if (input && "value" in input) {
+          input.value = "Explain this tool page simply and tell me exact next steps to use it.";
+          input.focus();
+        }
+      }, 120);
+    });
+
+    refreshState();
   })();
   window.addEventListener("toolbox:analytics", (e) => {
     if (e?.detail?.type === "tool_run") {

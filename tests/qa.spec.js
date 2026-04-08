@@ -56,3 +56,15 @@ test.describe("QA: homepage workflow shell", () => {
   });
 });
 
+test.describe("QA: Local AI runtime", () => {
+  test("AI Diagnostics runs full checks successfully", async ({ page }) => {
+    await page.goto("/tools/ai-diagnostics/index.html");
+    await expect(page.locator("#run-all")).toBeVisible();
+    await page.locator("#run-all").click();
+
+    await expect(page.locator("#output")).toContainText("Connection: PASS");
+    await expect(page.locator("#output")).toContainText("Generate test:", { timeout: 60000 });
+    await expect(page.locator("#output")).toContainText("Streaming test:", { timeout: 60000 });
+  });
+});
+

@@ -15,6 +15,13 @@ async function loadToolModule() {
     // Load tool.js relative to the CURRENT PAGE (not relative to this file).
     const url = new URL("./tool.js", window.location.href).toString();
     await import(url);
+    // Attach universal local-AI assistant for every tool page.
+    try {
+      const ai = await import(new URL("../../js/ai-provider.js", window.location.href).toString());
+      if (typeof ai.attachUniversalAIAssistant === "function") ai.attachUniversalAIAssistant();
+    } catch {
+      // keep tool functional even if assistant fails
+    }
   } catch (e) {
     // Log full details for debugging, but don't show raw errors to users.
     try {
