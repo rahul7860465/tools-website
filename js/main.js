@@ -1717,6 +1717,7 @@
           <button type="button" class="btn btn-small" id="agent-refresh-models">Refresh models</button>
           <label class="muted" style="display:flex;align-items:center;gap:6px"><input id="agent-memory" type="checkbox" checked/> Memory</label>
           <label class="muted" style="display:flex;align-items:center;gap:6px"><input id="agent-json-mode" type="checkbox"/> JSON actions</label>
+          <label class="muted" style="display:flex;align-items:center;gap:6px"><input id="agent-all-tools" type="checkbox" checked/> All tools access</label>
         </div>
         <div class="agent-quick">
           <button type="button" class="btn btn-small" data-agent-quick="Explain this page and how to use it">Explain this page</button>
@@ -1765,6 +1766,7 @@
     const refreshModels = panel.querySelector("#agent-refresh-models");
     const memoryToggle = panel.querySelector("#agent-memory");
     const jsonModeToggle = panel.querySelector("#agent-json-mode");
+    const allToolsToggle = panel.querySelector("#agent-all-tools");
     const toolsRow = panel.querySelector("#agent-tools");
     const autoFillBtn = panel.querySelector("#agent-autofill");
     const autoRunBtn = panel.querySelector("#agent-autorun");
@@ -1888,6 +1890,20 @@
       for (const a of actions.slice(0, 12)) {
         const type = String(a?.type || "").toLowerCase();
         const selector = String(a?.selector || "");
+        if (type === "open_tool") {
+          const toolId = String(a?.tool_id || a?.toolId || "").trim();
+          if (!toolId) continue;
+          const exists = Array.isArray(__tools) && __tools.some((t) => t.id === toolId);
+          if (!exists) continue;
+          window.location.href = `/tools/${toolId}/index.html`;
+          executed += 1;
+          break;
+        }
+        if (type === "wait_ms") {
+          // UI-only runner: ignore wait in synchronous executor.
+          executed += 1;
+          continue;
+        }
         if (type === "navigate") {
           const target = String(a?.url || "").trim();
           if (!target) continue;
@@ -1914,6 +1930,13 @@
             executed += 1;
           } else {
             el.textContent = value;
+            executed += 1;
+          }
+        } else if (type === "select_option") {
+          const value = String(a?.value ?? "");
+          if (el instanceof HTMLSelectElement) {
+            el.value = value;
+            el.dispatchEvent(new Event("change", { bubbles: true }));
             executed += 1;
           }
         } else if (type === "click") {
@@ -2047,11 +2070,15 @@
           : "";
         const selectedModel = String(modelSelect?.value || "").trim();
         const jsonMode = Boolean(jsonModeToggle?.checked);
+        const allTools = Boolean(allToolsToggle?.checked);
+        const toolList = allTools && Array.isArray(__tools) && __tools.length
+          ? __tools.map((t) => `${t.id}: ${t.name}`).join("\n")
+          : "";
         const profile = getProfile();
         await ai.runLocalAIStream({
           systemPrompt:
             jsonMode
-              ? 'You are a website automation agent for Toolbox. Output ONLY strict JSON object: {"actions":[{"type":"fill|set_text|click|navigate","selector":"#id or .class (if needed)","value":"text (for fill/set_text)","url":"path or same-origin url (for navigate)"}],"note":"short summary"}. Do not include markdown.'
+              ? `You are a website automation agent for Toolbox. Output ONLY strict JSON object: {"actions":[{"type":"fill|set_text|click|navigate|open_tool|select_option|wait_ms","selector":"#id or .class (if needed)","value":"text/value","url":"path or same-origin url (for navigate)","tool_id":"tool id for open_tool","ms":500}],"note":"short summary"}. Do not include markdown.${toolList ? `\nAvailable tools:\n${toolList}` : ""}`
               : `You are the website AI agent for Toolbox. ${profileSystemPrompt(profile)} Give concise, practical help and suggest specific tools/routes in this website.`,
           userPrompt: `${pageContext()}\n\n${memoryText}User request:\n${question}`,
           signal: activeController.signal,
