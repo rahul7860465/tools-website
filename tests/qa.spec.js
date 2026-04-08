@@ -44,3 +44,35 @@ test.describe("QA: navigation + console health", () => {
   }
 });
 
+test.describe("QA: homepage workflow shell", () => {
+  test("Command palette opens and navigates to selected tool", async ({ page }) => {
+    await page.goto("/index.html");
+    await page.keyboard.press("Control+k");
+    await expect(page.locator("#command-palette")).toBeVisible();
+    await page.locator("#command-input").fill("json formatter");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/tools\/json-formatter\/index\.html/);
+  });
+
+  test("Multi-panel tool runner adds/removes panels correctly", async ({ page }) => {
+    await page.goto("/index.html");
+    await page.locator("#runner-tool-select").selectOption("json-formatter");
+    await page.locator("#runner-add").click();
+    await page.locator("#runner-tool-select").selectOption("base64-encoder");
+    await page.locator("#runner-add").click();
+    await expect(page.locator("#runner-panels .runner-panel")).toHaveCount(2);
+    await page.locator('[data-runner-remove="json-formatter"]').click();
+    await expect(page.locator("#runner-panels .runner-panel")).toHaveCount(1);
+  });
+
+  test("Floating dock presets populate runner panels", async ({ page }) => {
+    await page.goto("/index.html");
+    await page.locator("#dock-preset-ai").click();
+    await expect(page.locator("#runner-panels .runner-panel")).toHaveCount(3);
+    await expect(page.locator('[data-panel-id="prompt-generator"]')).toHaveCount(1);
+    await expect(page.locator('[data-panel-id="prompt-optimizer"]')).toHaveCount(1);
+    await expect(page.locator('[data-panel-id="token-counter"]')).toHaveCount(1);
+  });
+});
+
