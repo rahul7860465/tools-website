@@ -61,6 +61,7 @@
   const DENSITY_KEY = "toolbox_density_v1";
   const PLAN_KEY = "toolbox_plan_v1";
   const CAPSULES_KEY = "toolbox_capsules_v1";
+  const WORKSPACE_SESSION_KEY = "toolbox_workspace_session_v1";
 
   function loadStats() {
     try {
@@ -111,6 +112,34 @@
   function saveFavorites(set) {
     try {
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(Array.from(set)));
+    } catch {
+      // ignore
+    }
+  }
+
+  function loadWorkspaceSession() {
+    try {
+      const raw = localStorage.getItem(WORKSPACE_SESSION_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return {
+        query: String(parsed?.query || ""),
+        category: String(parsed?.category || "all"),
+      };
+    } catch {
+      return { query: "", category: "all" };
+    }
+  }
+
+  function saveWorkspaceSession(query, category) {
+    try {
+      localStorage.setItem(
+        WORKSPACE_SESSION_KEY,
+        JSON.stringify({
+          query: String(query || ""),
+          category: String(category || "all"),
+          ts: Date.now(),
+        })
+      );
     } catch {
       // ignore
     }
@@ -623,6 +652,9 @@
     const pagerPrev = document.getElementById("pager-prev");
     const pagerNext = document.getElementById("pager-next");
     const chips = document.getElementById("category-chips");
+    const activeFilter = document.getElementById("workspace-active-filter");
+    const sessionChips = document.getElementById("workspace-session-chips");
+    const pinnedRoot = document.getElementById("workspace-pinned");
     if (!grid || !search) return;
 
     const cards = Array.from(grid.querySelectorAll("a.card"));
@@ -632,6 +664,39 @@
     const cats = cards.map((c) => String(c.dataset.category || "").trim());
     let page = 1;
     const pageSize = 18;
+    const savedSession = loadWorkspaceSession();
+    if (savedSession.query) search.value = savedSession.query;
+    if (category && savedSession.category) category.value = savedSession.category;
+
+    const renderWorkspaceState = () => {
+      const q = String(search.value || "").trim();
+      const c = category ? String(category.value || "all") : "all";
+      if (activeFilter) {
+        activeFilter.textContent = c === "all" ? `All tools${q ? ` • "${q}"` : ""}` : `${c}${q ? ` • "${q}"` : ""}`;
+      }
+      if (sessionChips) {
+        const parts = [];
+        if (q) parts.push(`<button type="button" class="workspace-chip" data-workspace-action="restore-query">Search: ${escapeHtml(q)}</button>`);
+        if (c !== "all") parts.push(`<button type="button" class="workspace-chip" data-workspace-action="restore-category">Category: ${escapeHtml(c)}</button>`);
+        parts.push('<button type="button" class="workspace-chip" data-workspace-action="clear-filters">Clear filters</button>');
+        sessionChips.innerHTML = parts.join("");
+      }
+      if (pinnedRoot) {
+        const favs = Array.from(loadFavorites()).slice(0, 6);
+        if (!favs.length) {
+          pinnedRoot.innerHTML = '<span class="muted">Pin tools using the star icon to build your quick workspace.</span>';
+        } else {
+          pinnedRoot.innerHTML = favs
+            .map((id) => {
+              const t = toolById(id);
+              if (!t) return "";
+              return `<a class="workspace-chip" href="./tools/${escapeHtml(t.id)}/index.html">Pinned: ${escapeHtml(t.name)}</a>`;
+            })
+            .join("");
+        }
+      }
+      saveWorkspaceSession(q, c);
+    };
 
     const apply = () => {
       const q = normalize(search.value);
@@ -672,6 +737,7 @@
           el.classList.toggle("is-active", el.getAttribute("data-value") === String(category.value || "all"));
         });
       }
+      renderWorkspaceState();
     };
 
     const resetAndApply = () => {
@@ -714,6 +780,7 @@
         const on = favs.has(id);
         target.textContent = on ? "★" : "☆";
         card.classList.toggle("is-favorite", on);
+        renderWorkspaceState();
       }
       if (action === "share") {
         const href = card.getAttribute("href");
@@ -725,6 +792,23 @@
         } catch {
           // ignore
         }
+      }
+    });
+    sessionChips?.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.getAttribute("data-workspace-action");
+      if (!action) return;
+      if (action === "restore-query") {
+        search.focus();
+        search.select?.();
+      } else if (action === "restore-category") {
+        category?.focus();
+      } else if (action === "clear-filters") {
+        search.value = "";
+        if (category) category.value = "all";
+        resetAndApply();
+        return;
       }
     });
     apply();
@@ -794,6 +878,36 @@
     }
   }
 
+  function renderRecentTools() {
+    const root = document.getElementById("recent-tools");
+    if (!root) return;
+    const stats = window.ToolboxTracking?.getStats?.() || { toolActions: {} };
+    const actions = Object.entries(stats.toolActions || {})
+      .map(([key, count]) => {
+        const id = String(key).split(":")[0];
+        return { id, count: Number(count) || 0 };
+      })
+      .filter((x) => x.id && x.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+    root.innerHTML = "";
+    if (!actions.length) {
+      root.innerHTML = '<div class="muted">No recent activity yet. Open a few tools to build your workspace history.</div>';
+      return;
+    }
+    for (const item of actions) {
+      const t = toolById(item.id);
+      if (!t) continue;
+      const a = document.createElement("a");
+      a.className = "smart-suggestion";
+      a.href = `./tools/${t.id}/index.html`;
+      a.innerHTML = `<div class="meta"><strong>${escapeHtml(t.name)}</strong><span class="muted">${escapeHtml(
+        t.category || ""
+      )} • ${item.count} actions</span></div><span class="btn btn-small">Open</span>`;
+      root.appendChild(a);
+    }
+  }
+
   function renderMainCategorySections() {
     const sections = [
       { sectionId: "ai-tools", gridId: "ai-tool-grid", category: "AI Tools" },
@@ -815,6 +929,225 @@
         root.appendChild(buildCard(t, { pathIsRelativeToCurrent: true }));
       }
     }
+  }
+
+  function initCommandPalette() {
+    const palette = document.getElementById("command-palette");
+    const input = document.getElementById("command-input");
+    const results = document.getElementById("command-results");
+    const closeBtn = document.getElementById("command-close");
+    const openA = document.getElementById("open-command-palette");
+    const openB = document.getElementById("open-command-palette-inline");
+    if (!palette || !input || !results) return;
+
+    let active = -1;
+    let filtered = [];
+
+    const getHref = (tool) => {
+      const slug = toolSlugFromPath(window.location.pathname);
+      return slug ? `../${tool.id}/index.html` : `./tools/${tool.id}/index.html`;
+    };
+
+    const render = () => {
+      const q = normalize(input.value);
+      filtered = __tools
+        .filter((t) => normalize(`${t.name} ${t.description} ${t.category}`).includes(q))
+        .slice(0, 12);
+      if (!filtered.length) {
+        results.innerHTML = '<div class="muted" style="padding:10px">No matching tools found.</div>';
+        active = -1;
+        return;
+      }
+      if (active >= filtered.length) active = filtered.length - 1;
+      results.innerHTML = filtered
+        .map(
+          (t, i) =>
+            `<button type="button" class="command-item ${i === active ? "is-active" : ""}" data-idx="${i}"><strong>${escapeHtml(
+              t.name
+            )}</strong><small>${escapeHtml(t.category || "")} • ${escapeHtml(t.description || "")}</small></button>`
+        )
+        .join("");
+    };
+
+    const open = () => {
+      palette.hidden = false;
+      render();
+      window.setTimeout(() => input.focus(), 0);
+    };
+    const close = () => {
+      palette.hidden = true;
+      active = -1;
+    };
+    const goActive = () => {
+      if (active < 0 || active >= filtered.length) return;
+      const t = filtered[active];
+      if (!t) return;
+      window.location.href = getHref(t);
+    };
+
+    openA?.addEventListener("click", open);
+    openB?.addEventListener("click", open);
+    closeBtn?.addEventListener("click", close);
+    palette.addEventListener("click", (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.getAttribute("data-close-palette") === "1") close();
+      const idx = Number(target.getAttribute("data-idx"));
+      if (Number.isFinite(idx) && idx >= 0 && idx < filtered.length) {
+        active = idx;
+        goActive();
+      }
+    });
+    input.addEventListener("input", () => {
+      active = 0;
+      render();
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        active = Math.min(filtered.length - 1, active + 1);
+        render();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        active = Math.max(0, active - 1);
+        render();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        goActive();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      const isCmdK = (e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === "k";
+      if (!isCmdK) return;
+      e.preventDefault();
+      if (palette.hidden) open();
+      else close();
+    });
+  }
+
+  function initMultiPanelRunner() {
+    const select = document.getElementById("runner-tool-select");
+    const addBtn = document.getElementById("runner-add");
+    const clearBtn = document.getElementById("runner-clear");
+    const panels = document.getElementById("runner-panels");
+    if (!select || !addBtn || !clearBtn || !panels) return;
+
+    select.innerHTML = '<option value="">Select a tool...</option>';
+    __tools.forEach((t) => {
+      const opt = document.createElement("option");
+      opt.value = t.id;
+      opt.textContent = `${t.name} (${t.category})`;
+      select.appendChild(opt);
+    });
+
+    const renderEmpty = () => {
+      if (panels.children.length) return;
+      panels.innerHTML = '<div class="muted">No panels yet. Select a tool and click "Add Panel".</div>';
+    };
+
+    const removePanel = (id) => {
+      const el = panels.querySelector(`[data-panel-id="${id}"]`);
+      if (el) el.remove();
+      renderEmpty();
+    };
+
+    const addPanelById = (toolId) => {
+      const id = String(toolId || "");
+      if (!id) return;
+      if (panels.querySelector(`[data-panel-id="${id}"]`)) return;
+      const active = panels.querySelectorAll(".runner-panel").length;
+      if (active >= 3) return;
+      const tool = toolById(id);
+      if (!tool) return;
+      if (panels.textContent.includes("No panels yet")) panels.innerHTML = "";
+
+      const card = document.createElement("div");
+      card.className = "runner-panel";
+      card.setAttribute("data-panel-id", id);
+      card.innerHTML = `
+        <div class="runner-head">
+          <strong>${escapeHtml(tool.name)}</strong>
+          <button type="button" class="btn btn-small" data-runner-remove="${escapeHtml(id)}">Remove</button>
+        </div>
+        <iframe class="runner-frame" loading="lazy" src="./tools/${escapeHtml(id)}/index.html" title="${escapeHtml(tool.name)}"></iframe>
+      `;
+      panels.appendChild(card);
+    };
+
+    addBtn.addEventListener("click", () => {
+      addPanelById(String(select.value || ""));
+    });
+
+    clearBtn.addEventListener("click", () => {
+      panels.innerHTML = "";
+      renderEmpty();
+    });
+
+    panels.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const id = target.getAttribute("data-runner-remove");
+      if (!id) return;
+      removePanel(id);
+    });
+
+    window.addEventListener("toolbox:runner:preset", (event) => {
+      const picks = Array.isArray(event?.detail?.tools) ? event.detail.tools : [];
+      panels.innerHTML = "";
+      for (const id of picks.slice(0, 3)) {
+        addPanelById(String(id));
+      }
+      renderEmpty();
+    });
+
+    renderEmpty();
+  }
+
+  function initFloatingDock() {
+    const recentRoot = document.getElementById("dock-recent");
+    const aiPreset = document.getElementById("dock-preset-ai");
+    const seoPreset = document.getElementById("dock-preset-seo");
+    if (!recentRoot) return;
+
+    const renderDockRecent = () => {
+      const stats = window.ToolboxTracking?.getStats?.() || { toolRuns: {} };
+      const ranked = Object.entries(stats.toolRuns || {})
+        .map(([id, count]) => ({ id, count: Number(count) || 0 }))
+        .filter((x) => x.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4);
+      if (!ranked.length) {
+        recentRoot.innerHTML = '<span class="muted">No recent runs yet.</span>';
+        return;
+      }
+      recentRoot.innerHTML = ranked
+        .map((r) => {
+          const t = toolById(r.id);
+          if (!t) return "";
+          return `<a class="workspace-chip" href="./tools/${escapeHtml(t.id)}/index.html">${escapeHtml(t.name)}</a>`;
+        })
+        .join("");
+    };
+
+    aiPreset?.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("toolbox:runner:preset", { detail: { tools: ["prompt-generator", "prompt-optimizer", "token-counter"] } }));
+      document.getElementById("tool-runner")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    seoPreset?.addEventListener("click", () => {
+      window.dispatchEvent(
+        new CustomEvent("toolbox:runner:preset", { detail: { tools: ["serp-preview", "keyword-density-checker", "plagiarism-checker"] } })
+      );
+      document.getElementById("tool-runner")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    renderDockRecent();
+    window.addEventListener("toolbox:analytics", (e) => {
+      if (e?.detail?.type === "tool_run") renderDockRecent();
+    });
   }
 
   function detectInputType(raw) {
@@ -1152,9 +1485,13 @@
 
       // Homepage: popular tools.
       renderPopularTools();
+      renderRecentTools();
       renderMainCategorySections();
       initSmartAnalyze();
       initLocalAiBadge();
+      initCommandPalette();
+      initMultiPanelRunner();
+      initFloatingDock();
       if (meta && !document.getElementById("tool-search")) {
         meta.textContent = `${__tools.length} tools`;
       }
@@ -1235,7 +1572,10 @@
     });
   })();
   window.addEventListener("toolbox:analytics", (e) => {
-    if (e?.detail?.type === "tool_run") renderPopularTools();
+    if (e?.detail?.type === "tool_run") {
+      renderPopularTools();
+      renderRecentTools();
+    }
   });
 
   // ---- PWA: Service worker registration ----

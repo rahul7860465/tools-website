@@ -295,6 +295,54 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://toolgarage.netlify.app/tools/word-counter/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/bmi-calculator/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/emi-calculator/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/age-calculator/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/percentage-calculator/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/discount-calculator/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/gst-calculator/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://toolgarage.netlify.app/tools/random-picker/index.html</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://toolgarage.netlify.app/seo/ai-humanizer-online.html</loc>
     <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>

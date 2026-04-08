@@ -470,6 +470,86 @@
       "icon": "code",
       "enabled": true,
       "premium": false
+    },
+    {
+      "id": "word-counter",
+      "name": "Word Counter",
+      "description": "Count words, characters, sentences, and reading time instantly.",
+      "category": "Utility Tools",
+      "path": "./tools/word-counter/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "bmi-calculator",
+      "name": "BMI Calculator",
+      "description": "Calculate BMI and weight category from height and weight.",
+      "category": "Utility Tools",
+      "path": "./tools/bmi-calculator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "emi-calculator",
+      "name": "EMI Calculator",
+      "description": "Calculate monthly EMI, total interest, and payable amount.",
+      "category": "Utility Tools",
+      "path": "./tools/emi-calculator/index.html",
+      "icon": "time",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "age-calculator",
+      "name": "Age Calculator",
+      "description": "Calculate exact age in years, months, and days.",
+      "category": "Utility Tools",
+      "path": "./tools/age-calculator/index.html",
+      "icon": "time",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "percentage-calculator",
+      "name": "Percentage Calculator",
+      "description": "Calculate percentages, increases, decreases, and differences.",
+      "category": "Utility Tools",
+      "path": "./tools/percentage-calculator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "discount-calculator",
+      "name": "Discount Calculator",
+      "description": "Find discount amount and final price quickly.",
+      "category": "Utility Tools",
+      "path": "./tools/discount-calculator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "gst-calculator",
+      "name": "GST Calculator",
+      "description": "Calculate GST-inclusive and GST-exclusive values.",
+      "category": "Utility Tools",
+      "path": "./tools/gst-calculator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "random-picker",
+      "name": "Random Picker",
+      "description": "Pick one or many random items from your list.",
+      "category": "Utility Tools",
+      "path": "./tools/random-picker/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
     }
   ]
 }

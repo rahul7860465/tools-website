@@ -66,6 +66,10 @@
       <div class="container header-strap">
         <span class="strap-pill"><span class="strap-dot" aria-hidden="true"></span><span>Fast developer tools, one place</span></span>
         <span class="muted">Private • offline-ready • zero install</span>
+        <button id="open-command-palette" class="btn btn-small palette-trigger" type="button" aria-label="Open command palette">
+          Quick Search
+          <kbd>Ctrl</kbd><span>+</span><kbd>K</kbd>
+        </button>
       </div>
     </header>
 
@@ -84,6 +88,27 @@
     </div>
 
     <main id="main" class="container home-main">
+      <aside id="floating-dock" class="floating-dock panel" aria-label="Floating productivity dock">
+        <div class="panel-body">
+          <strong>Productivity Dock</strong>
+          <div id="dock-recent" class="workspace-chips" style="margin-top:8px"></div>
+          <div class="workspace-chips">
+            <button id="dock-preset-ai" class="workspace-chip" type="button">AI Flow Preset</button>
+            <button id="dock-preset-seo" class="workspace-chip" type="button">SEO Flow Preset</button>
+          </div>
+        </div>
+      </aside>
+      <aside id="app-rail" class="app-rail panel" aria-label="Workspace navigation">
+        <div class="panel-body">
+          <a href="#ai-workspace" class="rail-item">AI Workspace</a>
+          <a href="#modern-dock" class="rail-item">App Dock</a>
+          <a href="#tool-runner" class="rail-item">Tool Runner</a>
+          <a href="#tools" class="rail-item">Tool Explorer</a>
+          <a href="#popular" class="rail-item">Popular</a>
+          <a href="#seo-guides" class="rail-item">SEO Guides</a>
+        </div>
+      </aside>
+
       <section id="ai-workspace" class="section hero">
         <div class="hero-top">
           <div>
@@ -158,6 +183,31 @@
           </article>
         </div>
       </section>
+
+      <section id="modern-dock" class="section">
+        <div class="section-head">
+          <h2>Modern App Dock</h2>
+          <div class="muted">React-like interaction patterns with fast client-side performance.</div>
+        </div>
+        <div class="modern-dock-grid" role="list">
+          <article class="modern-dock-card" role="listitem">
+            <div class="modern-dock-head"><span class="status-pill ok">Workflow</span><strong>Prompt Chain</strong></div>
+            <p class="muted">Generate -> Optimize -> Token check with streaming local AI support.</p>
+            <div class="actions"><a class="btn btn-small btn-primary" href="./tools/prompt-generator/index.html">Open Flow</a></div>
+          </article>
+          <article class="modern-dock-card" role="listitem">
+            <div class="modern-dock-head"><span class="status-pill">Analytics</span><strong>Content Studio</strong></div>
+            <p class="muted">Word count, plagiarism, keyword density, and SERP preview in one workspace.</p>
+            <div class="actions"><a class="btn btn-small btn-primary" href="./tools/word-counter/index.html">Start Writing Stack</a></div>
+          </article>
+          <article class="modern-dock-card" role="listitem">
+            <div class="modern-dock-head"><span class="status-pill">Finance</span><strong>Daily Utility Stack</strong></div>
+            <p class="muted">EMI, GST, discount, and percentage tools for real-world business calculations.</p>
+            <div class="actions"><a class="btn btn-small btn-primary" href="./tools/emi-calculator/index.html">Open Finance Tools</a></div>
+          </article>
+        </div>
+      </section>
+
       <section id="smart-analyze" class="section">
         <details class="section-fold panel smart-panel">
           <summary class="section-fold-summary">
@@ -247,12 +297,37 @@
         </details>
       </section>
 
+      <section id="tool-runner" class="section">
+        <div class="section-head">
+          <h2>Multi-Panel Tool Runner</h2>
+          <div class="muted">Open up to 3 tools side-by-side in one workspace.</div>
+        </div>
+        <div class="panel">
+          <div class="panel-body">
+            <div class="actions">
+              <select id="runner-tool-select" class="input" style="max-width:420px">
+                <option value="">Select a tool...</option>
+              </select>
+              <button id="runner-add" class="btn btn-small btn-primary" type="button">Add Panel</button>
+              <button id="runner-clear" class="btn btn-small btn-danger" type="button">Clear Panels</button>
+            </div>
+            <div id="runner-panels" class="runner-panels" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </section>
+
       <section id="popular" class="section">
         <div class="section-head">
           <h2>Popular Tools</h2>
           <div class="muted">Your most used tools on this device</div>
         </div>
         <div id="popular-tools" class="grid popular-grid" role="list"></div>
+        <div class="panel" style="margin-top:12px">
+          <div class="panel-body">
+            <h3 style="margin:0 0 8px">Recent Activity</h3>
+            <div id="recent-tools" class="smart-suggestions"></div>
+          </div>
+        </div>
       </section>
 
       <section id="ai-tools" class="section">
@@ -362,6 +437,17 @@
           <div class="dashboard-main">
             <div class="dashboard-commandbar">
               <span class="muted">Tip: Use search + category chips for instant narrowing.</span>
+              <button id="open-command-palette-inline" class="btn btn-small" type="button">Open Command Bar</button>
+            </div>
+            <div id="workspace-statebar" class="workspace-statebar panel" aria-label="Workspace state">
+              <div class="panel-body">
+                <div class="workspace-state-row">
+                  <strong>Workspace State</strong>
+                  <span id="workspace-active-filter" class="muted">All tools</span>
+                </div>
+                <div id="workspace-session-chips" class="workspace-chips"></div>
+                <div id="workspace-pinned" class="workspace-chips"></div>
+              </div>
             </div>
             <div class="dashboard-topbar">
               <h2>All Tools</h2>
@@ -439,5 +525,15 @@
     </footer>
 
     <script src="./js/main.js?v=pro-20260327-2" defer></script>
+    <div id="command-palette" class="command-palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+      <div class="command-palette-backdrop" data-close-palette="1"></div>
+      <div class="command-palette-panel">
+        <div class="command-palette-head">
+          <input id="command-input" class="input" type="search" placeholder="Search tools and jump instantly..." autocomplete="off" />
+          <button id="command-close" class="btn btn-small" type="button">Close</button>
+        </div>
+        <div id="command-results" class="command-results" role="listbox" aria-label="Command results"></div>
+      </div>
+    </div>
   </body>
 </html>
