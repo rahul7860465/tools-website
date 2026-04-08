@@ -61,6 +61,12 @@
       <div class="container header-strap">
         <span class="strap-pill"><span class="strap-dot" aria-hidden="true"></span><span>Fast developer tools, one place</span></span>
         <span class="muted">Private • offline-ready • zero install</span>
+        <div class="theme-presets" role="group" aria-label="Theme presets">
+          <button class="btn btn-small preset-btn is-active" data-theme-preset="vibrant" type="button">Vibrant</button>
+          <button class="btn btn-small preset-btn" data-theme-preset="minimal" type="button">Minimal</button>
+          <button class="btn btn-small preset-btn" data-theme-preset="neon" type="button">Neon</button>
+          <button id="fun-mode-toggle" class="btn btn-small preset-btn" type="button" aria-pressed="false">Fun Mode</button>
+        </div>
         <button id="open-command-palette" class="btn btn-small palette-trigger" type="button" aria-label="Open command palette">
           Quick Search
           <kbd>Ctrl</kbd><span>+</span><kbd>K</kbd>
@@ -429,5 +435,18 @@
         <div id="command-results" class="command-results" role="listbox" aria-label="Command results"></div>
       </div>
     </div>
+
+    <aside id="ai-float-card" class="ai-float-card" aria-label="AI quick action">
+      <div class="ai-float-glow" aria-hidden="true"></div>
+      <div class="ai-float-head">
+        <span class="ai-blink-dot" aria-hidden="true"></span>
+        <strong>AI Assistant</strong>
+      </div>
+      <p>Try faster workflows with prompt tools and code explainer.</p>
+      <div class="actions">
+        <a class="btn btn-small btn-primary" href="./tools/prompt-generator/index.html">Open AI</a>
+      </div>
+    </aside>
+    <div id="fun-particles" class="fun-particles" aria-hidden="true"></div>
   </body>
 </html>

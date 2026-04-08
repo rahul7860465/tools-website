@@ -62,6 +62,8 @@
   const PLAN_KEY = "toolbox_plan_v1";
   const CAPSULES_KEY = "toolbox_capsules_v1";
   const WORKSPACE_SESSION_KEY = "toolbox_workspace_session_v1";
+  const THEME_PRESET_KEY = "toolbox_theme_preset_v1";
+  const FUN_MODE_KEY = "toolbox_fun_mode_v1";
 
   function loadStats() {
     try {
@@ -1569,6 +1571,112 @@
         search.focus();
         search.select?.();
       }
+    });
+  })();
+
+  (function initThemePresets() {
+    const buttons = Array.from(document.querySelectorAll("[data-theme-preset]"));
+    if (!buttons.length) return;
+    const apply = (preset) => {
+      const p = ["vibrant", "minimal", "neon"].includes(preset) ? preset : "vibrant";
+      document.documentElement.setAttribute("data-preset", p);
+      try {
+        localStorage.setItem(THEME_PRESET_KEY, p);
+      } catch {
+        // ignore
+      }
+      buttons.forEach((b) => b.classList.toggle("is-active", b.getAttribute("data-theme-preset") === p));
+    };
+    let saved = "vibrant";
+    try {
+      saved = localStorage.getItem(THEME_PRESET_KEY) || "vibrant";
+    } catch {
+      // ignore
+    }
+    apply(saved);
+    buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        apply(String(b.getAttribute("data-theme-preset") || "vibrant"));
+      })
+    );
+  })();
+
+  (function initScrollReveal() {
+    const targets = Array.from(document.querySelectorAll(".section, .card, .panel"));
+    if (!targets.length) return;
+    targets.forEach((el) => el.classList.add("reveal"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("in-view");
+          io.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.08 }
+    );
+    targets.forEach((el) => io.observe(el));
+  })();
+
+  (function initFunMode() {
+    const btn = document.getElementById("fun-mode-toggle");
+    const particlesRoot = document.getElementById("fun-particles");
+    if (!btn) return;
+
+    let timer = null;
+
+    const spawnParticle = () => {
+      if (!particlesRoot) return;
+      const p = document.createElement("span");
+      p.className = "fun-particle";
+      const left = Math.random() * 100;
+      const size = 4 + Math.random() * 6;
+      const hue = Math.random() > 0.5 ? "255,122,162" : "126,123,255";
+      p.style.left = `${left}%`;
+      p.style.bottom = `${-10 + Math.random() * 20}px`;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.background = `rgba(${hue}, .85)`;
+      p.style.animation = `funFloatParticle ${2.2 + Math.random() * 2.1}s linear`;
+      particlesRoot.appendChild(p);
+      window.setTimeout(() => p.remove(), 4600);
+    };
+
+    const setFun = (on) => {
+      const value = on ? "on" : "off";
+      document.documentElement.setAttribute("data-fun-mode", value);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.classList.toggle("is-active", on);
+      btn.textContent = on ? "Fun Mode On" : "Fun Mode";
+      try {
+        localStorage.setItem(FUN_MODE_KEY, value);
+      } catch {
+        // ignore
+      }
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+      if (on) {
+        timer = window.setInterval(() => {
+          spawnParticle();
+          if (Math.random() > 0.6) spawnParticle();
+        }, 550);
+      } else if (particlesRoot) {
+        particlesRoot.innerHTML = "";
+      }
+    };
+
+    let saved = "off";
+    try {
+      saved = localStorage.getItem(FUN_MODE_KEY) || "off";
+    } catch {
+      // ignore
+    }
+    setFun(saved === "on");
+    btn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-fun-mode") === "on";
+      setFun(!current);
     });
   })();
   window.addEventListener("toolbox:analytics", (e) => {
