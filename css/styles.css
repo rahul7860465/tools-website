@@ -1410,6 +1410,98 @@ html[data-theme="light"] .site-header{
   }
 }
 
+/* ---- Layout management fix ---- */
+.home-main{
+  display:block;
+}
+.home-main > .section{
+  margin: 0;
+}
+
+/* Use document order only; avoid stale order rules */
+.home-main #ai-workspace,
+.home-main #featured-workflows,
+.home-main #modern-dock,
+.home-main #ai-tools,
+.home-main #seo-tools,
+.home-main #utility-tools,
+.home-main #education-tools,
+.home-main #health-tools,
+.home-main #finance-tools,
+.home-main #tools,
+.home-main #popular,
+.home-main #about{
+  order: unset !important;
+}
+
+.container{
+  max-width: 1320px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.section{
+  padding-top: 14px;
+  padding-bottom: 18px;
+}
+
+.section-head{
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom: 8px;
+}
+
+.hero-top{
+  align-items:start;
+  gap:14px;
+}
+
+.grid{
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:12px;
+}
+
+.dashboard-shell{
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap:12px;
+}
+.dashboard-sidebar{
+  top: 78px;
+}
+.dashboard-main{
+  padding:10px;
+}
+
+.tools-layout{
+  gap:12px;
+}
+
+@media (max-width: 1100px){
+  .dashboard-shell{
+    grid-template-columns: 1fr;
+  }
+  .dashboard-sidebar{
+    position:static;
+  }
+}
+
+@media (max-width: 700px){
+  .container{
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .section{
+    padding-top: 10px;
+    padding-bottom: 14px;
+  }
+  .hero{
+    padding:14px 12px 12px;
+  }
+  .grid{
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- Colorful clean theme ---- */
 :root{
   --bg:#0c1026;
