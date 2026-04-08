@@ -913,6 +913,9 @@
       { sectionId: "ai-tools", gridId: "ai-tool-grid", category: "AI Tools" },
       { sectionId: "seo-tools", gridId: "seo-tool-grid", category: "SEO Tools" },
       { sectionId: "utility-tools", gridId: "utility-tool-grid", category: "Utility Tools" },
+      { sectionId: "education-tools", gridId: "education-tool-grid", category: "Education Tools" },
+      { sectionId: "health-tools", gridId: "health-tool-grid", category: "Health Tools" },
+      { sectionId: "finance-tools", gridId: "finance-tool-grid", category: "Finance Tools" },
     ];
     for (const cfg of sections) {
       const root = document.getElementById(cfg.gridId);
@@ -1487,11 +1490,8 @@
       renderPopularTools();
       renderRecentTools();
       renderMainCategorySections();
-      initSmartAnalyze();
       initLocalAiBadge();
       initCommandPalette();
-      initMultiPanelRunner();
-      initFloatingDock();
       if (meta && !document.getElementById("tool-search")) {
         meta.textContent = `${__tools.length} tools`;
       }

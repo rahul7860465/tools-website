@@ -542,6 +542,36 @@
       "premium": false
     },
     {
+      "id": "grade-calculator",
+      "name": "Grade Calculator",
+      "description": "Calculate percentage and letter grade from marks.",
+      "category": "Education Tools",
+      "path": "./tools/grade-calculator/index.html",
+      "icon": "case",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "bmr-calculator",
+      "name": "BMR Calculator",
+      "description": "Estimate daily calorie needs from age, height, and weight.",
+      "category": "Health Tools",
+      "path": "./tools/bmr-calculator/index.html",
+      "icon": "time",
+      "enabled": true,
+      "premium": false
+    },
+    {
+      "id": "sip-calculator",
+      "name": "SIP Calculator",
+      "description": "Estimate SIP investment maturity value and gains.",
+      "category": "Finance Tools",
+      "path": "./tools/sip-calculator/index.html",
+      "icon": "code",
+      "enabled": true,
+      "premium": false
+    },
+    {
       "id": "random-picker",
       "name": "Random Picker",
       "description": "Pick one or many random items from your list.",
