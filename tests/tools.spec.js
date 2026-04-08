@@ -300,3 +300,105 @@ test.describe("Developer tools (browser-only)", () => {
   });
 });
 
+test.describe("AI workflow flows", () => {
+  test("Prompt Generator: share link restores state", async ({ page }) => {
+    await page.goto("/tools/prompt-generator/index.html");
+
+    await page.locator("#topic").fill("Landing page");
+    await page.locator("#audience").fill("Founders");
+    await page.locator("#goal").fill("Write a hero section");
+    await page.locator("#tone").selectOption("Technical");
+
+    const shareBtn = page
+      .locator('[aria-label="Workflow actions"] button')
+      .filter({ hasText: "Share link" })
+      .first();
+    await expect(shareBtn).toBeVisible();
+    await shareBtn.click();
+    await expect.poll(() => page.evaluate(() => window.location.hash)).toContain("tb_state=");
+    const shared = await page.evaluate(() => window.location.href);
+
+    const next = await page.context().newPage();
+    await next.goto(shared);
+    await expect(next.locator("#topic")).toHaveValue("Landing page");
+    await expect(next.locator("#audience")).toHaveValue("Founders");
+    await expect(next.locator("#goal")).toHaveValue("Write a hero section");
+    await expect(next.locator("#tone")).toHaveValue("Technical");
+    await next.close();
+  });
+
+  test("Prompt Generator -> Prompt Optimizer: send output flow", async ({ page }) => {
+    await page.goto("/tools/prompt-generator/index.html");
+    await page.locator("#topic").fill("Onboarding email");
+    await page.locator("#audience").fill("New users");
+    await page.locator("#goal").fill("Write a short welcome email");
+    await page.locator("#generate").click();
+    await expect(page.locator("#output")).toContainText("Context:");
+
+    const sendSelect = page.getByLabel("Send to tool");
+    await sendSelect.selectOption("prompt-optimizer");
+    await page.getByRole("button", { name: "Send output" }).click();
+
+    await expect(page).toHaveURL(/\/tools\/prompt-optimizer\/index\.html/);
+    await expect(page.locator("#input")).toHaveValue(/Context:/);
+    await expect(page.locator("#status")).toContainText("Received text from another tool.");
+  });
+
+  test("Code Explainer: stop streaming shows stopped status", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "toolbox_ai_settings_v1",
+        JSON.stringify({
+          enabled: true,
+          endpoint: "http://localhost:11434",
+          model: "fake-local-model",
+        })
+      );
+    });
+
+    await page.route("http://localhost:11434/api/generate", async (route) => {
+      await new Promise((r) => setTimeout(r, 8000));
+      await route.fulfill({
+        status: 200,
+        contentType: "application/x-ndjson",
+        body: '{"response":"Overview\\n","done":false}\n{"response":"Final output","done":true}\n',
+      });
+    });
+
+    await page.goto("/tools/code-explainer/index.html");
+    await page.locator("#input").fill("function test(){ return 1; }");
+    await page.locator("#explain").click();
+
+    const stopBtn = page.locator("#stop-explain");
+    await expect(stopBtn).toBeVisible();
+    await stopBtn.click();
+
+    await expect(page.locator("#status")).toContainText("Explanation stopped.");
+  });
+
+  test("Prompt Optimizer: local AI network failure falls back safely", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "toolbox_ai_settings_v1",
+        JSON.stringify({
+          enabled: true,
+          endpoint: "http://localhost:11434",
+          model: "fake-local-model",
+          retryAttempts: 0,
+        })
+      );
+    });
+
+    await page.route("http://localhost:11434/api/generate", async (route) => {
+      await route.abort("failed");
+    });
+
+    await page.goto("/tools/prompt-optimizer/index.html");
+    await page.locator("#input").fill("Write a better support reply prompt");
+    await page.locator("#optimize").click();
+
+    await expect(page.locator("#status")).toContainText(/Prompt optimized\.|Local AI unavailable, used standard optimizer\./);
+    await expect(page.locator("#output")).toContainText("Context:");
+  });
+});
+

@@ -8,6 +8,7 @@ const optimizeBtn = qs("#optimize");
 const copyBtn = qs("#copy");
 const clearBtn = qs("#clear");
 let activeController = null;
+let userStopped = false;
 
 function ensureStopButton() {
   if (!optimizeBtn || qs("#stop-optimize")) return;
@@ -18,7 +19,10 @@ function ensureStopButton() {
   stop.textContent = "Stop";
   stop.style.display = "none";
   optimizeBtn.parentElement?.appendChild(stop);
-  stop.addEventListener("click", () => activeController?.abort());
+  stop.addEventListener("click", () => {
+    userStopped = true;
+    activeController?.abort();
+  });
 }
 ensureStopButton();
 const stopBtn = qs("#stop-optimize");
@@ -64,6 +68,7 @@ optimizeBtn?.addEventListener("click", async () => {
     try {
       showStatus("Optimizing with local AI...");
       activeController?.abort();
+      userStopped = false;
       activeController = new AbortController();
       if (stopBtn) stopBtn.style.display = "";
       setText(output, "");
@@ -76,7 +81,16 @@ optimizeBtn?.addEventListener("click", async () => {
         signal: activeController.signal,
         onToken: (_chunk, all) => setText(output, all),
       });
-    } catch {
+      if (userStopped) {
+        showStatus("Optimization stopped.");
+        return;
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e || "");
+      if (userStopped || /aborted|aborterror/i.test(msg)) {
+        showStatus("Optimization stopped.");
+        return;
+      }
       text = fallback;
       showStatus("Local AI unavailable, used standard optimizer.");
     } finally {
@@ -102,6 +116,8 @@ copyBtn?.addEventListener("click", async () => {
 });
 
 clearBtn?.addEventListener("click", () => {
+  userStopped = true;
+  activeController?.abort();
   if (input) input.value = "";
   setText(output, "");
   showStatus("");

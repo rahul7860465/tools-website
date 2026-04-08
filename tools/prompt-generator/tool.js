@@ -12,6 +12,7 @@ const regenerateBtn = qs("#regenerate");
 const copyBtn = qs("#copy");
 const clearBtn = qs("#clear");
 let activeController = null;
+let userStopped = false;
 
 function ensureStopButton() {
   if (!generateBtn || qs("#stop-generate")) return;
@@ -22,7 +23,10 @@ function ensureStopButton() {
   stop.textContent = "Stop";
   stop.style.display = "none";
   generateBtn.parentElement?.appendChild(stop);
-  stop.addEventListener("click", () => activeController?.abort());
+  stop.addEventListener("click", () => {
+    userStopped = true;
+    activeController?.abort();
+  });
 }
 ensureStopButton();
 const stopBtn = qs("#stop-generate");
@@ -81,6 +85,7 @@ generateBtn?.addEventListener("click", async () => {
     try {
       showStatus("Generating with local AI...");
       activeController?.abort();
+      userStopped = false;
       activeController = new AbortController();
       if (stopBtn) stopBtn.style.display = "";
       const t = (topic?.value || "").trim();
@@ -97,7 +102,16 @@ generateBtn?.addEventListener("click", async () => {
         signal: activeController.signal,
         onToken: (_chunk, all) => setText(output, all),
       });
-    } catch {
+      if (userStopped) {
+        showStatus("Generation stopped.");
+        return;
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e || "");
+      if (userStopped || /aborted|aborterror/i.test(msg)) {
+        showStatus("Generation stopped.");
+        return;
+      }
       text = fallback;
       showStatus("Local AI unavailable, used standard generator.");
     } finally {
@@ -119,6 +133,7 @@ regenerateBtn?.addEventListener("click", async () => {
     try {
       showStatus("Regenerating with local AI...");
       activeController?.abort();
+      userStopped = false;
       activeController = new AbortController();
       if (stopBtn) stopBtn.style.display = "";
       setText(output, "");
@@ -131,7 +146,16 @@ regenerateBtn?.addEventListener("click", async () => {
         signal: activeController.signal,
         onToken: (_chunk, all) => setText(output, all),
       });
-    } catch {
+      if (userStopped) {
+        showStatus("Regeneration stopped.");
+        return;
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e || "");
+      if (userStopped || /aborted|aborterror/i.test(msg)) {
+        showStatus("Regeneration stopped.");
+        return;
+      }
       text = fallback;
       showStatus("Local AI unavailable, used standard regenerate.");
     } finally {
@@ -157,6 +181,8 @@ copyBtn?.addEventListener("click", async () => {
 });
 
 clearBtn?.addEventListener("click", () => {
+  userStopped = true;
+  activeController?.abort();
   if (topic) topic.value = "";
   if (audience) audience.value = "";
   if (goal) goal.value = "";

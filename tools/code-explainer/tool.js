@@ -9,6 +9,7 @@ const explainBtn = qs("#explain");
 const copyBtn = qs("#copy");
 const clearBtn = qs("#clear");
 let activeController = null;
+let userStopped = false;
 
 function ensureStopButton() {
   if (!explainBtn || qs("#stop-explain")) return;
@@ -19,7 +20,10 @@ function ensureStopButton() {
   stop.textContent = "Stop";
   stop.style.display = "none";
   explainBtn.parentElement?.appendChild(stop);
-  stop.addEventListener("click", () => activeController?.abort());
+  stop.addEventListener("click", () => {
+    userStopped = true;
+    activeController?.abort();
+  });
 }
 ensureStopButton();
 const stopBtn = qs("#stop-explain");
@@ -92,6 +96,7 @@ async function explainCode() {
     try {
       showStatus("Explaining with local AI...");
       activeController?.abort();
+      userStopped = false;
       activeController = new AbortController();
       if (stopBtn) stopBtn.style.display = "";
       setText(output, "");
@@ -104,7 +109,16 @@ async function explainCode() {
         signal: activeController.signal,
         onToken: (_chunk, all) => setText(output, all),
       });
-    } catch {
+      if (userStopped) {
+        showStatus("Explanation stopped.");
+        return;
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e || "");
+      if (userStopped || /aborted|aborterror/i.test(msg)) {
+        showStatus("Explanation stopped.");
+        return;
+      }
       result = fallback;
       showStatus("Local AI unavailable, used standard explainer.");
     } finally {
@@ -133,6 +147,8 @@ copyBtn?.addEventListener("click", async () => {
 });
 
 clearBtn?.addEventListener("click", () => {
+  userStopped = true;
+  activeController?.abort();
   if (input) input.value = "";
   if (language) language.value = "auto";
   setText(output, "");
