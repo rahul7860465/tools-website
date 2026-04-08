@@ -294,6 +294,25 @@ a{color:inherit}
   margin-top:2px;
   font-weight:700;
 }
+.ai-global-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:.82rem;
+  background: rgba(255,255,255,.06);
+}
+.ai-global-chip .dot{
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background:#ff9ab8;
+}
+.ai-global-chip.ok .dot{
+  background:#7affdc;
+}
 
 /* Tool-page AI visibility */
 .tool-ai-power{

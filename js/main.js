@@ -2323,6 +2323,48 @@
 
     refreshState();
   })();
+
+  (function initGlobalAIChip() {
+    const nav = document.querySelector(".site-nav");
+    if (!nav || document.getElementById("ai-global-chip")) return;
+    const chip = document.createElement("button");
+    chip.id = "ai-global-chip";
+    chip.type = "button";
+    chip.className = "ai-global-chip";
+    chip.innerHTML = '<span class="dot" aria-hidden="true"></span><span id="ai-global-label">AI: checking...</span>';
+    chip.setAttribute("aria-label", "Open AI agent");
+    nav.appendChild(chip);
+
+    const label = chip.querySelector("#ai-global-label");
+    const setState = (text, ok = false) => {
+      if (label) label.textContent = text;
+      chip.classList.toggle("ok", ok);
+    };
+
+    chip.addEventListener("click", () => {
+      const launcher = document.getElementById("site-ai-agent");
+      if (launcher) launcher.click();
+    });
+
+    (async () => {
+      try {
+        const ai = await import(new URL("js/ai-provider.js", SITE_ROOT_URL).toString());
+        const s = ai.getLocalAISettings();
+        if (!s.enabled) {
+          setState("AI: off");
+          return;
+        }
+        try {
+          const models = await ai.listLocalModels();
+          setState(models.length ? `AI: ${models[0]}` : "AI: on", true);
+        } catch {
+          setState("AI: endpoint issue");
+        }
+      } catch {
+        setState("AI: unavailable");
+      }
+    })();
+  })();
   window.addEventListener("toolbox:analytics", (e) => {
     if (e?.detail?.type === "tool_run") {
       renderPopularTools();

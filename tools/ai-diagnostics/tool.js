@@ -58,6 +58,7 @@ async function runDiagnostics() {
     timeoutMs: 120000,
     retryAttempts: 0,
   });
+  if (endpointEl) endpointEl.value = settings.endpoint;
 
   append("AI Diagnostics");
   append(`Endpoint: ${settings.endpoint}`);
@@ -72,6 +73,7 @@ async function runDiagnostics() {
   } catch (e) {
     append(`Connection: FAIL`);
     append(`Reason: ${e instanceof Error ? e.message : "Unknown error"}`);
+    append("Hint: Use endpoint http://localhost:11434 and ensure Ollama allows browser origin.");
     show("Diagnostics failed at connection step.", true);
     return;
   }
@@ -90,6 +92,7 @@ async function runDiagnostics() {
     append("");
     append(`Generate test: FAIL`);
     append(`Reason: ${e instanceof Error ? e.message : "Unknown error"}`);
+    append("Hint: If using custom model, verify model exists in /api/tags.");
   }
 
   try {
@@ -111,6 +114,7 @@ async function runDiagnostics() {
     append("");
     append(`Streaming test: FAIL`);
     append(`Reason: ${e instanceof Error ? e.message : "Unknown error"}`);
+    append("Hint: First run may be slow; try again after model warmup.");
     show("Diagnostics completed with some failures.", true);
   }
 }

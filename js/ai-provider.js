@@ -9,6 +9,22 @@ const DEFAULT_SETTINGS = {
   retryAttempts: 1,
 };
 
+function sanitizeEndpoint(raw) {
+  let v = String(raw || "").trim();
+  if (!v) return DEFAULT_SETTINGS.endpoint;
+  // Common typo fix: localhost.11434 -> localhost:11434
+  v = v.replace(/localhost\.(\d{2,5})/i, "localhost:$1");
+  // Add protocol if missing.
+  if (!/^https?:\/\//i.test(v)) v = `http://${v}`;
+  try {
+    const u = new URL(v);
+    // Keep only origin as endpoint base.
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return DEFAULT_SETTINGS.endpoint;
+  }
+}
+
 function safeParse(raw, fallback) {
   try {
     const p = JSON.parse(raw);
@@ -25,7 +41,7 @@ export function getLocalAISettings() {
     const p = safeParse(raw, DEFAULT_SETTINGS);
     return {
       enabled: Boolean(p.enabled),
-      endpoint: String(p.endpoint || DEFAULT_SETTINGS.endpoint),
+      endpoint: sanitizeEndpoint(p.endpoint || DEFAULT_SETTINGS.endpoint),
       model: String(p.model || DEFAULT_SETTINGS.model),
       timeoutMs: Number(p.timeoutMs) > 0 ? Number(p.timeoutMs) : DEFAULT_SETTINGS.timeoutMs,
       retryAttempts: Number(p.retryAttempts) >= 0 ? Number(p.retryAttempts) : DEFAULT_SETTINGS.retryAttempts,
@@ -39,7 +55,7 @@ export function setLocalAISettings(next) {
   const current = getLocalAISettings();
   const merged = {
     enabled: typeof next?.enabled === "boolean" ? next.enabled : current.enabled,
-    endpoint: String(next?.endpoint || current.endpoint || DEFAULT_SETTINGS.endpoint),
+    endpoint: sanitizeEndpoint(next?.endpoint || current.endpoint || DEFAULT_SETTINGS.endpoint),
     model: String(next?.model || current.model || DEFAULT_SETTINGS.model),
     timeoutMs: Number(next?.timeoutMs) > 0 ? Number(next.timeoutMs) : current.timeoutMs,
     retryAttempts: Number(next?.retryAttempts) >= 0 ? Number(next.retryAttempts) : current.retryAttempts,
@@ -93,7 +109,7 @@ async function getJson(url, signal) {
 
 export async function listLocalModels(signal) {
   const s = getLocalAISettings();
-  const base = String(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
+  const base = sanitizeEndpoint(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
   const data = await getJson(`${base}/api/tags`, signal);
   const models = Array.isArray(data?.models) ? data.models : [];
   return models.map((m) => String(m?.name || "")).filter(Boolean);
@@ -102,7 +118,7 @@ export async function listLocalModels(signal) {
 export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperature = 0.3, maxTokens = 700, signal, model } = {}) {
   const s = getLocalAISettings();
   if (!s.enabled) throw new Error("Local AI mode is disabled.");
-  const base = String(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
+  const base = sanitizeEndpoint(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
   const prompt = `${String(systemPrompt || "").trim()}\n\n${String(userPrompt || "").trim()}`.trim();
   if (!prompt) throw new Error("Prompt is empty.");
   let data = null;
@@ -162,7 +178,7 @@ export async function runLocalAIStream({
 } = {}) {
   const s = getLocalAISettings();
   if (!s.enabled) throw new Error("Local AI mode is disabled.");
-  const base = String(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
+  const base = sanitizeEndpoint(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
   const prompt = `${String(systemPrompt || "").trim()}\n\n${String(userPrompt || "").trim()}`.trim();
   if (!prompt) throw new Error("Prompt is empty.");
 
