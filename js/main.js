@@ -2365,6 +2365,71 @@
       }
     })();
   })();
+
+  (function initAIBridgeBanner() {
+    const ensureBanner = (message, hosted) => {
+      let root = document.getElementById("ai-bridge-banner");
+      if (!root) {
+        root = document.createElement("aside");
+        root.id = "ai-bridge-banner";
+        root.className = "notice ai-bridge-banner";
+        root.setAttribute("role", "status");
+        const container = document.querySelector(".container");
+        if (container) container.prepend(root);
+        else document.body.prepend(root);
+      }
+      root.innerHTML = `
+        <div class="ai-bridge-row">
+          <strong>Local AI helper</strong>
+          <span class="muted">${hosted ? "Public site mode" : "Local mode"}</span>
+        </div>
+        <div class="muted">${escapeHtml(message)}</div>
+        <div class="actions" style="margin-top:8px">
+          <button type="button" class="btn btn-small btn-primary" id="ai-bridge-retry">Retry AI check</button>
+          <button type="button" class="btn btn-small" id="ai-bridge-copy">Copy bridge command</button>
+        </div>
+      `;
+      const retryBtn = root.querySelector("#ai-bridge-retry");
+      const copyBtn = root.querySelector("#ai-bridge-copy");
+      retryBtn?.addEventListener("click", () => window.location.reload());
+      copyBtn?.addEventListener("click", async () => {
+        try {
+          await copyToClipboard("start-ai-bridge.bat");
+        } catch {
+          // ignore copy failure
+        }
+      });
+      root.style.display = "";
+    };
+
+    const hideBanner = () => {
+      const root = document.getElementById("ai-bridge-banner");
+      if (root) root.style.display = "none";
+    };
+
+    (async () => {
+      try {
+        const ai = await import(new URL("js/ai-provider.js", SITE_ROOT_URL).toString());
+        const s = ai.getLocalAISettings();
+        if (!s.enabled) {
+          hideBanner();
+          return;
+        }
+        try {
+          await ai.listLocalModels();
+          hideBanner();
+        } catch {
+          const hosted = window.location.protocol === "https:" && !/^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname || "");
+          const msg = hosted
+            ? "AI is ON but local endpoint is blocked/unreachable from this hosted page. Run start-ai-bridge.bat once, keep it running, then reload."
+            : "AI is ON but endpoint is unreachable. Start Ollama and run start-ai-bridge.bat, then retry.";
+          ensureBanner(msg, hosted);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  })();
   window.addEventListener("toolbox:analytics", (e) => {
     if (e?.detail?.type === "tool_run") {
       renderPopularTools();

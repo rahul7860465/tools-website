@@ -13,6 +13,7 @@
     "seo:generate": "node scripts/generate-seo-pages.mjs",
     "seo:boost": "node scripts/boost-seo-head.mjs",
     "sitemap:refresh": "node scripts/refresh-sitemap.mjs",
+    "ai:bridge": "node scripts/ollama-bridge.mjs",
     "preview": "node serve.js",
     "preview:dist": "set ROOT=dist&& node serve.js"
   },

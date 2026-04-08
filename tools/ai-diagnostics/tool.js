@@ -63,6 +63,7 @@ async function runDiagnostics() {
   append("AI Diagnostics");
   append(`Endpoint: ${settings.endpoint}`);
   append(`Model: ${settings.model}`);
+  append(`Auto-fallback bridge: http://127.0.0.1:11435`);
   append("");
 
   try {

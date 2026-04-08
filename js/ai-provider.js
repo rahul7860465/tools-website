@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS = {
   timeoutMs: 45000,
   retryAttempts: 1,
 };
+const LOCAL_BRIDGE_ENDPOINTS = ["http://127.0.0.1:11435", "http://localhost:11435"];
 
 function sanitizeEndpoint(raw) {
   let v = String(raw || "").trim();
@@ -23,6 +24,40 @@ function sanitizeEndpoint(raw) {
   } catch {
     return DEFAULT_SETTINGS.endpoint;
   }
+}
+
+function uniqueStrings(values) {
+  const out = [];
+  const seen = new Set();
+  for (const v of values) {
+    const s = String(v || "").trim();
+    if (!s || seen.has(s)) continue;
+    seen.add(s);
+    out.push(s);
+  }
+  return out;
+}
+
+function shouldTryLocalBridge() {
+  try {
+    const host = String(window.location.hostname || "").toLowerCase();
+    return host && host !== "localhost" && host !== "127.0.0.1";
+  } catch {
+    return true;
+  }
+}
+
+function endpointCandidates(endpoint) {
+  const primary = sanitizeEndpoint(endpoint || DEFAULT_SETTINGS.endpoint);
+  if (!shouldTryLocalBridge()) return [primary];
+  return uniqueStrings([primary, ...LOCAL_BRIDGE_ENDPOINTS.map((e) => sanitizeEndpoint(e))]);
+}
+
+function maybePersistWorkingEndpoint(current, working) {
+  const a = sanitizeEndpoint(current);
+  const b = sanitizeEndpoint(working);
+  if (!b || a === b) return;
+  setLocalAISettings({ endpoint: b });
 }
 
 function safeParse(raw, fallback) {
@@ -109,58 +144,75 @@ async function getJson(url, signal) {
 
 export async function listLocalModels(signal) {
   const s = getLocalAISettings();
-  const base = sanitizeEndpoint(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
-  const data = await getJson(`${base}/api/tags`, signal);
-  const models = Array.isArray(data?.models) ? data.models : [];
-  return models.map((m) => String(m?.name || "")).filter(Boolean);
+  const endpoints = endpointCandidates(s.endpoint);
+  let lastErr = null;
+  for (const ep of endpoints) {
+    const base = sanitizeEndpoint(ep).replace(/\/+$/, "");
+    try {
+      const data = await getJson(`${base}/api/tags`, signal);
+      maybePersistWorkingEndpoint(s.endpoint, ep);
+      const models = Array.isArray(data?.models) ? data.models : [];
+      return models.map((m) => String(m?.name || "")).filter(Boolean);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("Unable to connect to local AI.");
 }
 
 export async function runLocalAI({ systemPrompt = "", userPrompt = "", temperature = 0.3, maxTokens = 700, signal, model } = {}) {
   const s = getLocalAISettings();
   if (!s.enabled) throw new Error("Local AI mode is disabled.");
-  const base = sanitizeEndpoint(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
   const prompt = `${String(systemPrompt || "").trim()}\n\n${String(userPrompt || "").trim()}`.trim();
   if (!prompt) throw new Error("Prompt is empty.");
+  const endpoints = endpointCandidates(s.endpoint);
   let data = null;
   let lastErr = null;
-  let modelToUse = String(model || s.model);
   const attempts = Math.max(0, Number(s.retryAttempts) || 0) + 1;
-  for (let i = 0; i < attempts; i += 1) {
-    const ts = timeoutSignal(s.timeoutMs, signal);
-    try {
-      data = await postJson(
-        `${base}/api/generate`,
-        {
-          model: modelToUse,
-          prompt,
-          stream: false,
-          options: {
-            temperature: Number(temperature) || 0.3,
-            num_predict: Number(maxTokens) || 700,
+
+  for (const ep of endpoints) {
+    const base = sanitizeEndpoint(ep).replace(/\/+$/, "");
+    let modelToUse = String(model || s.model);
+    for (let i = 0; i < attempts; i += 1) {
+      const ts = timeoutSignal(s.timeoutMs, signal);
+      try {
+        data = await postJson(
+          `${base}/api/generate`,
+          {
+            model: modelToUse,
+            prompt,
+            stream: false,
+            options: {
+              temperature: Number(temperature) || 0.3,
+              num_predict: Number(maxTokens) || 700,
+            },
           },
-        },
-        ts.signal
-      );
-      ts.cleanup();
-      lastErr = null;
-      break;
-    } catch (e) {
-      ts.cleanup();
-      lastErr = e;
-      // If model missing/not found on this Ollama, fallback to first available model.
-      if (/404/.test(String(e?.message || ""))) {
-        try {
-          const available = await listLocalModels(signal);
-          if (available.length && available[0] && available[0] !== modelToUse) {
-            modelToUse = String(available[0]);
+          ts.signal
+        );
+        ts.cleanup();
+        maybePersistWorkingEndpoint(s.endpoint, ep);
+        lastErr = null;
+        break;
+      } catch (e) {
+        ts.cleanup();
+        lastErr = e;
+        // If model missing/not found on this Ollama, fallback to first available model.
+        if (/404/.test(String(e?.message || ""))) {
+          try {
+            const available = await listLocalModels(signal);
+            if (available.length && available[0] && available[0] !== modelToUse) {
+              modelToUse = String(available[0]);
+            }
+          } catch {
+            // ignore fallback lookup errors
           }
-        } catch {
-          // ignore fallback lookup errors
         }
+        if (i < attempts - 1) await delay(250);
       }
-      if (i < attempts - 1) await delay(250);
     }
+    if (data) break;
   }
+
   if (lastErr) throw lastErr;
   const text = String(data?.response || "").trim();
   if (!text) throw new Error("Local AI returned empty output.");
@@ -178,81 +230,86 @@ export async function runLocalAIStream({
 } = {}) {
   const s = getLocalAISettings();
   if (!s.enabled) throw new Error("Local AI mode is disabled.");
-  const base = sanitizeEndpoint(s.endpoint || DEFAULT_SETTINGS.endpoint).replace(/\/+$/, "");
   const prompt = `${String(systemPrompt || "").trim()}\n\n${String(userPrompt || "").trim()}`.trim();
   if (!prompt) throw new Error("Prompt is empty.");
 
+  const endpoints = endpointCandidates(s.endpoint);
   const attempts = Math.max(0, Number(s.retryAttempts) || 0) + 1;
-  let modelToUse = String(model || s.model);
   let lastErr = null;
-  for (let i = 0; i < attempts; i += 1) {
-    const ts = timeoutSignal(s.timeoutMs, signal);
-    try {
-      const res = await fetch(`${base}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: modelToUse,
-          prompt,
-          stream: true,
-          options: {
-            temperature: Number(temperature) || 0.3,
-            num_predict: Number(maxTokens) || 700,
-          },
-        }),
-        signal: ts.signal,
-      });
-      if (!res.ok) throw new Error(`Local AI request failed (${res.status}).`);
-      if (!res.body) throw new Error("Streaming not supported by this browser.");
+  for (const ep of endpoints) {
+    const base = sanitizeEndpoint(ep).replace(/\/+$/, "");
+    let modelToUse = String(model || s.model);
+    for (let i = 0; i < attempts; i += 1) {
+      const ts = timeoutSignal(s.timeoutMs, signal);
+      try {
+        const res = await fetch(`${base}/api/generate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: modelToUse,
+            prompt,
+            stream: true,
+            options: {
+              temperature: Number(temperature) || 0.3,
+              num_predict: Number(maxTokens) || 700,
+            },
+          }),
+          signal: ts.signal,
+        });
+        if (!res.ok) throw new Error(`Local AI request failed (${res.status}).`);
+        if (!res.body) throw new Error("Streaming not supported by this browser.");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      let finalText = "";
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        let finalText = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        let nl = buf.indexOf("\n");
-        while (nl >= 0) {
-          const line = buf.slice(0, nl).trim();
-          buf = buf.slice(nl + 1);
-          if (line) {
-            try {
-              const row = JSON.parse(line);
-              const chunk = String(row?.response || "");
-              if (chunk) {
-                finalText += chunk;
-                if (typeof onToken === "function") onToken(chunk, finalText);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          let nl = buf.indexOf("\n");
+          while (nl >= 0) {
+            const line = buf.slice(0, nl).trim();
+            buf = buf.slice(nl + 1);
+            if (line) {
+              try {
+                const row = JSON.parse(line);
+                const chunk = String(row?.response || "");
+                if (chunk) {
+                  finalText += chunk;
+                  if (typeof onToken === "function") onToken(chunk, finalText);
+                }
+                if (row?.done) {
+                  ts.cleanup();
+                  maybePersistWorkingEndpoint(s.endpoint, ep);
+                  return finalText.trim();
+                }
+              } catch {
+                // ignore malformed line chunks
               }
-              if (row?.done) {
-                ts.cleanup();
-                return finalText.trim();
-              }
-            } catch {
-              // ignore malformed line chunks
             }
+            nl = buf.indexOf("\n");
           }
-          nl = buf.indexOf("\n");
         }
-      }
-      ts.cleanup();
-      return finalText.trim();
-    } catch (e) {
-      ts.cleanup();
-      lastErr = e;
-      if (/404/.test(String(e?.message || ""))) {
-        try {
-          const available = await listLocalModels(signal);
-          if (available.length && available[0] && available[0] !== modelToUse) {
-            modelToUse = String(available[0]);
+        ts.cleanup();
+        maybePersistWorkingEndpoint(s.endpoint, ep);
+        return finalText.trim();
+      } catch (e) {
+        ts.cleanup();
+        lastErr = e;
+        if (/404/.test(String(e?.message || ""))) {
+          try {
+            const available = await listLocalModels(signal);
+            if (available.length && available[0] && available[0] !== modelToUse) {
+              modelToUse = String(available[0]);
+            }
+          } catch {
+            // ignore fallback lookup errors
           }
-        } catch {
-          // ignore fallback lookup errors
         }
+        if (i < attempts - 1) await delay(250);
       }
-      if (i < attempts - 1) await delay(250);
     }
   }
   throw lastErr || new Error("Local AI streaming failed.");

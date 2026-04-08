@@ -313,6 +313,18 @@ a{color:inherit}
 .ai-global-chip.ok .dot{
   background:#7affdc;
 }
+.ai-bridge-banner{
+  margin: 10px 0 14px;
+  border-color: rgba(255,180,221,.35);
+  background: linear-gradient(120deg, rgba(255,122,162,.12), rgba(126,123,255,.10));
+}
+.ai-bridge-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:4px;
+}
 
 /* Tool-page AI visibility */
 .tool-ai-power{
