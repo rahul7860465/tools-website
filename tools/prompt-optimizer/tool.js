@@ -1,4 +1,5 @@
-import { qs, setText, copyText, flashCopied } from "../../js/toolkit.js";
+import { qs, setText, copyText, flashCopied, initToolWorkflowUI } from "../../js/toolkit.js";
+import { attachLocalAIControls, isLocalAIEnabled, runLocalAIStream } from "../../js/ai-provider.js";
 
 const input = qs("#input");
 const output = qs("#output");
@@ -6,6 +7,21 @@ const status = qs("#status");
 const optimizeBtn = qs("#optimize");
 const copyBtn = qs("#copy");
 const clearBtn = qs("#clear");
+let activeController = null;
+
+function ensureStopButton() {
+  if (!optimizeBtn || qs("#stop-optimize")) return;
+  const stop = document.createElement("button");
+  stop.type = "button";
+  stop.id = "stop-optimize";
+  stop.className = "btn btn-small btn-danger";
+  stop.textContent = "Stop";
+  stop.style.display = "none";
+  optimizeBtn.parentElement?.appendChild(stop);
+  stop.addEventListener("click", () => activeController?.abort());
+}
+ensureStopButton();
+const stopBtn = qs("#stop-optimize");
 
 function showStatus(msg, isError = false) {
   if (!status) return;
@@ -40,9 +56,34 @@ function optimizePrompt(raw) {
   ].join("\n");
 }
 
-optimizeBtn?.addEventListener("click", () => {
-  const text = optimizePrompt(input?.value || "");
-  if (!text) return showStatus("Paste a prompt first.", true);
+optimizeBtn?.addEventListener("click", async () => {
+  const fallback = optimizePrompt(input?.value || "");
+  if (!fallback) return showStatus("Paste a prompt first.", true);
+  let text = fallback;
+  if (isLocalAIEnabled()) {
+    try {
+      showStatus("Optimizing with local AI...");
+      activeController?.abort();
+      activeController = new AbortController();
+      if (stopBtn) stopBtn.style.display = "";
+      setText(output, "");
+      text = await runLocalAIStream({
+        systemPrompt:
+          "You improve prompts. Return only the optimized prompt with sections: Context, Task, Instructions, Output format.",
+        userPrompt: `Optimize this prompt:\n\n${String(input?.value || "")}`,
+        temperature: 0.35,
+        maxTokens: 700,
+        signal: activeController.signal,
+        onToken: (_chunk, all) => setText(output, all),
+      });
+    } catch {
+      text = fallback;
+      showStatus("Local AI unavailable, used standard optimizer.");
+    } finally {
+      activeController = null;
+      if (stopBtn) stopBtn.style.display = "none";
+    }
+  }
   setText(output, text);
   showStatus("Prompt optimized.");
   window.ToolboxTracking?.trackRun("prompt-optimizer", "optimize");
@@ -65,3 +106,20 @@ clearBtn?.addEventListener("click", () => {
   setText(output, "");
   showStatus("");
 });
+
+initToolWorkflowUI({
+  toolId: "prompt-optimizer",
+  statusEl: status,
+  getState: () => ({
+    input: input?.value || "",
+  }),
+  setState: (s) => {
+    if (input) input.value = String(s?.input || "");
+  },
+  getPrimaryText: () => output?.textContent || "",
+  setPrimaryText: (txt) => {
+    if (input) input.value = String(txt || "").slice(0, 200000);
+  },
+});
+
+attachLocalAIControls({ statusEl: status });

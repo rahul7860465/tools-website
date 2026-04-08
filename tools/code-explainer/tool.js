@@ -1,4 +1,5 @@
-import { qs, setText, copyText, flashCopied } from "../../js/toolkit.js";
+import { qs, setText, copyText, flashCopied, initToolWorkflowUI } from "../../js/toolkit.js";
+import { attachLocalAIControls, isLocalAIEnabled, runLocalAIStream } from "../../js/ai-provider.js";
 
 const input = qs("#input");
 const language = qs("#language");
@@ -7,6 +8,21 @@ const status = qs("#status");
 const explainBtn = qs("#explain");
 const copyBtn = qs("#copy");
 const clearBtn = qs("#clear");
+let activeController = null;
+
+function ensureStopButton() {
+  if (!explainBtn || qs("#stop-explain")) return;
+  const stop = document.createElement("button");
+  stop.type = "button";
+  stop.id = "stop-explain";
+  stop.className = "btn btn-small btn-danger";
+  stop.textContent = "Stop";
+  stop.style.display = "none";
+  explainBtn.parentElement?.appendChild(stop);
+  stop.addEventListener("click", () => activeController?.abort());
+}
+ensureStopButton();
+const stopBtn = qs("#stop-explain");
 
 function showStatus(msg, isError = false) {
   if (!status) return;
@@ -46,7 +62,7 @@ function extractFunctions(code, lang) {
   return out;
 }
 
-function explainCode() {
+async function explainCode() {
   const code = String(input?.value || "").trim();
   if (!code) {
     showStatus("Paste code first.", true);
@@ -57,7 +73,7 @@ function explainCode() {
   const lines = code.split(/\r?\n/).length;
   const funcs = extractFunctions(code, lang);
 
-  const result = [
+  const fallback = [
     "Overview",
     `This appears to be ${lang.toUpperCase()} code with about ${lines} lines. The snippet defines logic that processes input, applies conditions, and produces output based on the provided rules.`,
     "",
@@ -70,6 +86,32 @@ function explainCode() {
     "Key functions used",
     funcs.length ? `- ${funcs.join("\n- ")}` : "- No explicit named functions detected in this snippet.",
   ].join("\n");
+
+  let result = fallback;
+  if (isLocalAIEnabled()) {
+    try {
+      showStatus("Explaining with local AI...");
+      activeController?.abort();
+      activeController = new AbortController();
+      if (stopBtn) stopBtn.style.display = "";
+      setText(output, "");
+      result = await runLocalAIStream({
+        systemPrompt:
+          "Explain code for a developer. Return exactly 3 sections with headings: Overview, Step-by-step explanation, Key functions used.",
+        userPrompt: `Language: ${lang}\nCode:\n${code}`,
+        temperature: 0.25,
+        maxTokens: 900,
+        signal: activeController.signal,
+        onToken: (_chunk, all) => setText(output, all),
+      });
+    } catch {
+      result = fallback;
+      showStatus("Local AI unavailable, used standard explainer.");
+    } finally {
+      activeController = null;
+      if (stopBtn) stopBtn.style.display = "none";
+    }
+  }
 
   setText(output, result);
   showStatus("Explanation generated.");
@@ -96,3 +138,22 @@ clearBtn?.addEventListener("click", () => {
   setText(output, "");
   showStatus("");
 });
+
+initToolWorkflowUI({
+  toolId: "code-explainer",
+  statusEl: status,
+  getState: () => ({
+    input: input?.value || "",
+    language: language?.value || "auto",
+  }),
+  setState: (s) => {
+    if (input) input.value = String(s?.input || "");
+    if (language) language.value = String(s?.language || "auto");
+  },
+  getPrimaryText: () => output?.textContent || "",
+  setPrimaryText: (txt) => {
+    if (input) input.value = String(txt || "").slice(0, 200000);
+  },
+});
+
+attachLocalAIControls({ statusEl: status });

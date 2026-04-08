@@ -1,4 +1,4 @@
-import { qs, setText, copyText } from "../../js/toolkit.js";
+import { qs, setText, copyText, initToolWorkflowUI } from "../../js/toolkit.js";
 
 const input = qs("#input");
 const chars = qs("#chars");
@@ -49,3 +49,18 @@ clearBtn?.addEventListener("click", () => {
 });
 
 updateCounts();
+
+initToolWorkflowUI({
+  toolId: "token-counter",
+  statusEl: status,
+  getState: () => ({ input: input?.value || "" }),
+  setState: (s) => {
+    if (input) input.value = String(s?.input || "");
+    updateCounts();
+  },
+  getPrimaryText: () => input?.value || "",
+  setPrimaryText: (txt) => {
+    if (input) input.value = String(txt || "").slice(0, 200000);
+    updateCounts();
+  },
+});

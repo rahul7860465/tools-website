@@ -1,4 +1,4 @@
-import { qs, setText, copyText, flashCopied, safeExec, tryFormatJson } from "../../js/toolkit.js";
+import { qs, setText, copyText, flashCopied, safeExec, tryFormatJson, initToolWorkflowUI } from "../../js/toolkit.js";
 
 const input = qs("#input");
 const output = qs("#output");
@@ -137,4 +137,17 @@ clearBtn.addEventListener("click", () => {
 
 formatBtn.addEventListener("click", format);
 validateBtn.addEventListener("click", validate);
+
+initToolWorkflowUI({
+  toolId: "json-formatter",
+  statusEl: status,
+  getState: () => ({ input: input?.value || "" }),
+  setState: (s) => {
+    if (input) input.value = String(s?.input || "");
+  },
+  getPrimaryText: () => output?.textContent || "",
+  setPrimaryText: (txt) => {
+    if (input) input.value = String(txt || "").slice(0, MAX_INPUT_CHARS);
+  },
+});
 
