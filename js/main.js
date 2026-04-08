@@ -1124,11 +1124,11 @@
       const raw = localStorage.getItem("toolbox_ai_settings_v1");
       const parsed = raw ? JSON.parse(raw) : null;
       const enabled = Boolean(parsed?.enabled);
-      badge.textContent = enabled ? "Connected (configured)" : "Offline / disabled";
+      badge.textContent = enabled ? "Enabled (local)" : "Off (cloud-free)";
       badge.classList.remove("ok", "off");
       badge.classList.add(enabled ? "ok" : "off");
     } catch {
-      badge.textContent = "Offline / disabled";
+      badge.textContent = "Off (cloud-free)";
       badge.classList.remove("ok");
       badge.classList.add("off");
     }
