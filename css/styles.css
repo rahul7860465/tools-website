@@ -207,37 +207,88 @@ a{color:inherit}
 /* Global Ollama agent */
 .agent-launcher{
   position: fixed;
-  right: 14px;
-  bottom: 14px;
+  right: 18px;
+  bottom: 18px;
   z-index: 35;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  color: var(--text);
+  box-shadow: 0 16px 30px rgba(0,0,0,.24);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.agent-launcher:hover{
+  transform: translateY(-2px);
+  border-color: rgba(106,166,255,.34);
+  box-shadow: 0 20px 38px rgba(0,0,0,.28);
+}
+.agent-launcher:focus{
+  outline:none;
+  box-shadow: var(--focus), 0 20px 38px rgba(0,0,0,.28);
+}
+.agent-launcher-dot{
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(106,166,255,.18);
+}
+.agent-launcher-label{
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.agent-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 34;
+  background: rgba(5,10,20,.55);
+  backdrop-filter: blur(3px);
 }
 .agent-panel{
   position: fixed;
-  right: 14px;
-  bottom: 64px;
+  right: 0;
+  top: 0;
+  bottom: 0;
   z-index: 36;
-  width: min(380px, calc(100% - 22px));
-  border:1px solid rgba(255,180,221,.42);
-  border-radius:14px;
-  background: linear-gradient(145deg, rgba(36,18,58,.95), rgba(22,13,40,.95));
-  box-shadow: 0 18px 36px rgba(0,0,0,.42);
+  width: min(460px, calc(100% - 20px));
+  border-left:1px solid var(--border);
+  border-radius:0;
+  background: linear-gradient(180deg, rgba(15,26,51,.98), rgba(10,18,36,.98));
+  box-shadow: -22px 0 46px rgba(0,0,0,.38);
   overflow:hidden;
+  transform: translateX(102%);
+  transition: transform var(--dur-2) var(--ease);
+  display:grid;
+  grid-template-rows: auto 1fr auto;
 }
-.agent-panel[hidden]{ display:none; }
+.agent-panel[hidden]{ display:block; }
+.agent-panel.is-open{ transform: translateX(0); }
 .agent-head{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:8px;
-  padding:10px 12px;
+  padding:14px 14px;
   border-bottom:1px solid var(--border);
+  background: rgba(255,255,255,.03);
+}
+.agent-head strong{
+  font-size:.98rem;
+  letter-spacing:.2px;
 }
 .agent-log{
-  max-height: 260px;
   overflow:auto;
-  padding:10px;
+  padding:12px 14px;
   display:grid;
   gap:8px;
+  background: rgba(0,0,0,.08);
 }
 .agent-msg{
   border:1px solid var(--border);
@@ -250,10 +301,11 @@ a{color:inherit}
   background: rgba(126,123,255,.16);
 }
 .agent-compose{
-  padding:10px;
+  padding:12px 14px;
   border-top:1px solid var(--border);
   display:grid;
   gap:8px;
+  background: rgba(255,255,255,.02);
 }
 .agent-quick{
   display:flex;
@@ -329,9 +381,9 @@ a{color:inherit}
 /* Tool-page AI visibility */
 .tool-ai-power{
   margin-top:10px;
-  border:1px solid rgba(255,180,221,.36);
-  border-radius:12px;
-  background: linear-gradient(120deg, rgba(255,122,162,.14), rgba(126,123,255,.14));
+  border:1px solid var(--border);
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
   padding:10px 12px;
 }
 .tool-ai-power .rowline{
@@ -351,10 +403,10 @@ a{color:inherit}
   width:9px;
   height:9px;
   border-radius:999px;
-  background:#ff9ab8;
+  background: rgba(255,185,102,.95);
 }
 .tool-ai-power .dot.ok{
-  background:#7affdc;
+  background: rgba(95,213,152,.95);
 }
 
 @media (max-width: 760px){
@@ -363,10 +415,7 @@ a{color:inherit}
     bottom:10px;
   }
   .agent-panel{
-    right:10px;
-    left:10px;
-    width:auto;
-    bottom:58px;
+    width: min(520px, calc(100% - 12px));
   }
 }
 .header-strap .strap-pill{
@@ -1695,8 +1744,8 @@ html[data-theme="light"] .site-header{
   }
 }
 
-/* ---- Vibrant animated UX refresh ---- */
-:root{
+/* ---- Preset: Vibrant ---- */
+html[data-preset="vibrant"]{
   --bg:#1a1027;
   --panel:#211337;
   --panel2:#2a1844;
@@ -1705,38 +1754,33 @@ html[data-theme="light"] .site-header{
   --primary:#ff7aa2;
   --primary2:#7e7bff;
 }
-
-body{
+html[data-preset="vibrant"] body{
   background:
     radial-gradient(900px 500px at 8% 0%, rgba(255,122,162,.24), transparent 62%),
     radial-gradient(900px 520px at 90% 0%, rgba(126,123,255,.28), transparent 64%),
     radial-gradient(700px 520px at 50% 100%, rgba(122,255,220,.14), transparent 64%),
     linear-gradient(180deg, #1a1027, #170f24 58%, #130c1e);
 }
-
-.site-header{
+html[data-preset="vibrant"] .site-header{
   background: linear-gradient(180deg, rgba(32,17,50,.88), rgba(32,17,50,.68));
 }
-
-.btn-primary{
+html[data-preset="vibrant"] .btn-primary{
   background: linear-gradient(120deg, rgba(255,122,162,.42), rgba(126,123,255,.40));
   border-color: rgba(255,176,207,.42);
   box-shadow: 0 10px 24px rgba(173,89,198,.30);
 }
-.btn-primary:hover{
+html[data-preset="vibrant"] .btn-primary:hover{
   background: linear-gradient(120deg, rgba(255,122,162,.62), rgba(126,123,255,.56));
 }
-
-.brand-chip{
+html[data-preset="vibrant"] .brand-chip{
   border-color: rgba(255,166,202,.45);
   background: linear-gradient(180deg, rgba(255,122,162,.24), rgba(126,123,255,.18));
 }
-
-.panel, .card{
+html[data-preset="vibrant"] .panel,
+html[data-preset="vibrant"] .card{
   border-color: rgba(255,180,221,.20);
 }
-
-.card:hover{
+html[data-preset="vibrant"] .card:hover{
   border-color: rgba(255,180,221,.45);
 }
 
@@ -1884,33 +1928,4 @@ html[data-fun-mode="on"] .btn-primary{
   100%{ opacity:0; transform: translate3d(0, -120px, 0) scale(1.25); }
 }
 
-/* ---- Colorful clean theme ---- */
-:root{
-  --bg:#0c1026;
-  --panel:#12193a;
-  --panel2:#151f46;
-  --text:#eef3ff;
-  --muted:#b9c5e8;
-  --primary:#4ac2ff;
-  --primary2:#7a65ff;
-}
-body{
-  background:
-    radial-gradient(900px 520px at 0% 0%, rgba(74,194,255,.20), transparent 60%),
-    radial-gradient(900px 520px at 100% 0%, rgba(122,101,255,.22), transparent 62%),
-    linear-gradient(180deg, #0c1026, #0a0f22 55%, #090d1a);
-}
-.section h2{
-  font-size:1.35rem;
-  letter-spacing:.2px;
-}
-.btn-primary{
-  background: linear-gradient(120deg, rgba(74,194,255,.35), rgba(122,101,255,.32));
-  border-color: rgba(122,170,255,.42);
-}
-.btn-primary:hover{
-  background: linear-gradient(120deg, rgba(74,194,255,.52), rgba(122,101,255,.42));
-}
-.panel, .card{
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-}
+/* (Removed unconditional theme override that was forcing "colorful" everywhere) */

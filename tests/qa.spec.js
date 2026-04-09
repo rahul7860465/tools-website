@@ -32,7 +32,8 @@ test.describe("QA: navigation + console health", () => {
       });
       page.on("pageerror", (err) => errors.push(err.message));
 
-      await page.goto(t.url.replace(/^\.\//, "/"));
+      // Use DOMContentLoaded to avoid waiting on optional background fetches.
+      await page.goto(t.url.replace(/^\.\//, "/"), { waitUntil: "domcontentloaded" });
 
       // Allow lazy tool module to load.
       await page.waitForTimeout(500);

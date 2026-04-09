@@ -1580,7 +1580,7 @@
     const buttons = Array.from(document.querySelectorAll("[data-theme-preset]"));
     if (!buttons.length) return;
     const apply = (preset) => {
-      const p = ["vibrant", "minimal", "neon"].includes(preset) ? preset : "vibrant";
+      const p = ["vibrant", "minimal", "neon"].includes(preset) ? preset : "minimal";
       document.documentElement.setAttribute("data-preset", p);
       try {
         localStorage.setItem(THEME_PRESET_KEY, p);
@@ -1591,7 +1591,7 @@
     };
     let saved = "vibrant";
     try {
-      saved = localStorage.getItem(THEME_PRESET_KEY) || "vibrant";
+      saved = localStorage.getItem(THEME_PRESET_KEY) || "minimal";
     } catch {
       // ignore
     }
@@ -1689,13 +1689,19 @@
     const launcher = document.createElement("button");
     launcher.id = "site-ai-agent";
     launcher.type = "button";
-    launcher.className = "btn btn-primary agent-launcher";
-    launcher.textContent = "AI Agent";
+    launcher.className = "agent-launcher";
+    launcher.innerHTML = '<span class="agent-launcher-dot" aria-hidden="true"></span><span class="agent-launcher-label">AI</span>';
     launcher.setAttribute("aria-label", "Open AI agent");
+
+    const backdrop = document.createElement("div");
+    backdrop.id = "agent-backdrop";
+    backdrop.className = "agent-backdrop";
+    backdrop.hidden = true;
 
     const panel = document.createElement("section");
     panel.className = "agent-panel";
-    panel.hidden = true;
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "true");
     panel.innerHTML = `
       <div class="agent-head">
         <strong>Ollama Agent</strong>
@@ -1750,6 +1756,7 @@
       </div>
     `;
 
+    mount.appendChild(backdrop);
     mount.appendChild(panel);
     mount.appendChild(launcher);
 
@@ -1980,12 +1987,19 @@
     };
 
     const setOpen = (open) => {
-      panel.hidden = !open;
-      launcher.textContent = open ? "AI Agent Open" : "AI Agent";
-      if (open) input?.focus();
+      const on = Boolean(open);
+      panel.classList.toggle("is-open", on);
+      panel.setAttribute("aria-hidden", on ? "false" : "true");
+      launcher.setAttribute("aria-expanded", on ? "true" : "false");
+      backdrop.hidden = !on;
+      if (on) input?.focus();
     };
-    launcher.addEventListener("click", () => setOpen(panel.hidden));
+    launcher.addEventListener("click", () => setOpen(panel.getAttribute("aria-hidden") === "true"));
     close?.addEventListener("click", () => setOpen(false));
+    backdrop.addEventListener("click", () => setOpen(false));
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setOpen(false);
+    });
 
     panel.querySelectorAll("[data-agent-quick]").forEach((btn) => {
       btn.addEventListener("click", () => {
